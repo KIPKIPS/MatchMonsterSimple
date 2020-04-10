@@ -22,7 +22,7 @@ public class GameManager : MonoBehaviour {
 
     //甜品预制体的字典，我们可以通过甜品的种类来得到对应的甜品游戏物体
     public Dictionary<SweetsType, GameObject> sweetPrefabDict;
-
+    public GameObject[] sweetPrefabArr;
     [System.Serializable]
     public struct SweetPrefab {
         public SweetsType type;
@@ -75,18 +75,19 @@ public class GameManager : MonoBehaviour {
         _instance = this;
     }
 
-
     // Use this for initialization
     void Start() {
         //字典的实例化
-        sweetPrefabDict = new Dictionary<SweetsType, GameObject>();
-        for (int i = 0; i < sweetPrefabs.Length; i++) {
-            if (!sweetPrefabDict.ContainsKey(sweetPrefabs[i].type)) {
-                sweetPrefabDict.Add(sweetPrefabs[i].type, sweetPrefabs[i].prefab);
-            }
+        //sweetPrefabDict = new Dictionary<SweetsType, GameObject>();
+        sweetPrefabArr = new GameObject[sweetPrefabs.Length];
+        for(int i = 0; i < sweetPrefabs.Length; i++) {
+            sweetPrefabArr[i] = sweetPrefabs[i].prefab;
         }
-
-
+        //for (int i = 0; i < sweetPrefabs.Length; i++) {
+        //    if (!sweetPrefabDict.ContainsKey(sweetPrefabs[i].type)) {
+        //        sweetPrefabDict.Add(sweetPrefabs[i].type, sweetPrefabs[i].prefab);
+        //    }
+        //}
         for (int x = 0; x < xColumn; x++) {
             for (int y = 0; y < yRow; y++) {
                 GameObject chocolate = Instantiate(gridPrefab, CorrectPositon(x, y), Quaternion.identity);
@@ -156,7 +157,8 @@ public class GameManager : MonoBehaviour {
 
     //产生甜品的方法
     public GameSweet CreateNewSweet(int x, int y, SweetsType type) {
-        GameObject newSweet = Instantiate(sweetPrefabDict[type], CorrectPositon(x, y), Quaternion.identity);
+        //GameObject newSweet = Instantiate(sweetPrefabDict[type], CorrectPositon(x, y), Quaternion.identity);
+        GameObject newSweet = Instantiate(sweetPrefabArr[(int)type], CorrectPositon(x, y), Quaternion.identity);
         newSweet.transform.parent = transform;
 
         sweets[x, y] = newSweet.GetComponent<GameSweet>();
@@ -249,7 +251,9 @@ public class GameManager : MonoBehaviour {
             GameSweet sweet = sweets[x, 0];
 
             if (sweet.Type == SweetsType.EMPTY) {
-                GameObject newSweet = Instantiate(sweetPrefabDict[SweetsType.NORMAL], CorrectPositon(x, -1), Quaternion.identity);
+                //GameObject newSweet = Instantiate(sweetPrefabDict[SweetsType.NORMAL], CorrectPositon(x, -1), Quaternion.identity);
+                GameObject newSweet = Instantiate(sweetPrefabArr[(int)SweetsType.NORMAL], CorrectPositon(x, -1), Quaternion.identity);
+         
                 newSweet.transform.parent = transform;
 
                 sweets[x, 0] = newSweet.GetComponent<GameSweet>();
@@ -318,7 +322,7 @@ public class GameManager : MonoBehaviour {
     }
 
     /// <summary>
-    /// 玩家对我们甜品操作进行拖拽处理的方法
+    /// 玩家对甜品操作进行拖拽处理的方法
     /// </summary>
     #region
     public void PressSweet(GameSweet sweet) {
