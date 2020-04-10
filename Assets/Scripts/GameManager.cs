@@ -4,13 +4,15 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
-public class GameManager : MonoBehaviour {
+public class GameManager : MonoBehaviour
+{
     /// <summary>
     /// 甜品相关的成员变量
     /// </summary>
     #region
     //甜品的种类
-    public enum SweetsType {
+    public enum SweetsType
+    {
         EMPTY,
         NORMAL,
         BARRIER,
@@ -24,7 +26,8 @@ public class GameManager : MonoBehaviour {
     public Dictionary<SweetsType, GameObject> sweetPrefabDict;
     public GameObject[] sweetPrefabArr;
     [System.Serializable]
-    public struct SweetPrefab {
+    public struct SweetPrefab
+    {
         public SweetsType type;
         public GameObject prefab;
     }
@@ -80,7 +83,7 @@ public class GameManager : MonoBehaviour {
         //字典的实例化
         //sweetPrefabDict = new Dictionary<SweetsType, GameObject>();
         sweetPrefabArr = new GameObject[sweetPrefabs.Length];
-        for(int i = 0; i < sweetPrefabs.Length; i++) {
+        for (int i = 0; i < sweetPrefabs.Length; i++) {
             sweetPrefabArr[i] = sweetPrefabs[i].prefab;
         }
         //for (int i = 0; i < sweetPrefabs.Length; i++) {
@@ -151,7 +154,7 @@ public class GameManager : MonoBehaviour {
     public Vector3 CorrectPositon(int x, int y) {
         //实际需要实例化巧克力块的X位置=GameManager位置的X坐标-大网格长度的一半+行列对应的X坐标
         //实际需要实例化巧克力块的Y位置=GameManager位置的Y坐标+大网格高度的一半-行列对应的Y坐标
-        return new Vector3(transform.position.x - xColumn / 2f + x*0.6f, transform.position.y + yRow / 2f - y*0.6f);
+        return new Vector3(transform.position.x - xColumn / 2f + x * 0.6f, transform.position.y + yRow / 2f - y * 0.6f);
 
     }
 
@@ -192,7 +195,7 @@ public class GameManager : MonoBehaviour {
             for (int x = 0; x < xColumn; x++) {
                 GameSweet sweet = sweets[x, y];//得到当前元素位置的甜品对象
 
-                if (sweet.CanMove())//如果无法移动，则无法往下填充 
+                if (sweet.CanMove())//如果无法移动，则无法往下填充
                 {
                     GameSweet sweetBelow = sweets[x, y + 1];
 
@@ -253,7 +256,7 @@ public class GameManager : MonoBehaviour {
             if (sweet.Type == SweetsType.EMPTY) {
                 //GameObject newSweet = Instantiate(sweetPrefabDict[SweetsType.NORMAL], CorrectPositon(x, -1), Quaternion.identity);
                 GameObject newSweet = Instantiate(sweetPrefabArr[(int)SweetsType.NORMAL], CorrectPositon(x, -1), Quaternion.identity);
-         
+
                 newSweet.transform.parent = transform;
 
                 sweets[x, 0] = newSweet.GetComponent<GameSweet>();
@@ -597,11 +600,7 @@ public class GameManager : MonoBehaviour {
                             else if (specialSweetsType == SweetsType.RAINBOWCANDY && newSweet.CanColor()) {
                                 newSweet.ColoredComponent.SetColor(ColorSweet.ColorType.ANY);
                             }
-
                         }
-
-
-
                     }
                 }
             }

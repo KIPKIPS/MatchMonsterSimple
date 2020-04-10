@@ -14,4 +14,10 @@ public class LoadGame : MonoBehaviour {
     {
         Application.Quit();
     }
+    public void NewGame() {
+        SceneManager.LoadScene(1);
+    }
+    public void Achievement() {
+
+    }
 }
