@@ -94,14 +94,48 @@ public class GameManager : MonoBehaviour {
         for (int y = yRow-2; y >=0 ; y--) {
             for (int x = 0; x < xCol; x++) {
                 ModelBase model = models[x, y];//当前元素的基础组件
+                //向下填充空缺
                 if (model.CanMove()) {
                     ModelBase modelBelow = models[x, y + 1];//正下方model组件
-                    if (modelBelow.Type==ModelType.Empty) {
+                    if (modelBelow.Type==ModelType.Empty) {//垂直填充
                         Destroy(modelBelow.gameObject);
                         model.ModelMoveComponent.Move(x,y+1,fillTime);//向下移动
                         models[x, y + 1] = model;//正下方的组件指向当前组件
                         CreatNewModel(x, y, ModelType.Empty);//当前元素置空
                         notFinished = true;
+                    }
+                    //斜向填充,用于解决存在障碍物的情况
+                    else {
+                        for (int down = -1; down <= 1; down++) {
+                            if (down != 0) {
+                                int downX = x + down;
+                                if (downX >= 0 && downX < xCol) {//排除最右侧
+                                    ModelBase downModel = models[downX, y + 1];
+                                    if (downModel.Type == ModelType.Empty) {
+                                        bool canFill = true;//是否满足垂直填充
+                                        for (int aboveY = y; aboveY >= 0; aboveY--) {
+                                            ModelBase modelAbove = models[downX, aboveY];
+                                            if (modelAbove.CanMove()) {
+                                                break;
+                                            }
+                                            else if (!modelAbove.CanMove() && modelAbove.Type != ModelType.Empty) {
+                                                canFill = false;
+                                                break;
+                                            }
+                                        }
+                                        //斜向填充
+                                        if (!canFill) {
+                                            Destroy(downModel.gameObject);
+                                            model.ModelMoveComponent.Move(downX, y + 1, fillTime);
+                                            models[downX, y + 1] = model;
+                                            CreatNewModel(x, y, ModelType.Empty);
+                                            notFinished = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
