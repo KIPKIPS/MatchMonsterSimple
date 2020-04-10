@@ -31,7 +31,7 @@ public class GameManager : MonoBehaviour {
     public ModelPrefab[] modelPrefabs;
     //二维数组
     public ModelBase[,] models;
-    public float fillTime=0.1f;
+    public float fillTime = 0.1f;
     void Awake() {
         instance = this;
     }
@@ -67,7 +67,7 @@ public class GameManager : MonoBehaviour {
                 CreatNewModel(x, y, ModelType.Empty);
             }
         }
-        Destroy(models[4,4].gameObject);
+        Destroy(models[4, 4].gameObject);
         CreatNewModel(4, 4, ModelType.Wall);
         StartCoroutine(FillAll());
     }
@@ -75,7 +75,6 @@ public class GameManager : MonoBehaviour {
     public Vector3 CalGridPos(int x, int y) {
         return new Vector3(transform.position.x - xCol / 2f * 0.56f + x * 0.65f, transform.position.y + yRow / 2f * 0.15f - y * 0.65f);
     }
-
     //产生model的方法
     public ModelBase CreatNewModel(int x, int y, ModelType type) {
         GameObject newModel = Instantiate(modelPrefabDict[type], CalGridPos(x, y), Quaternion.identity);
@@ -93,15 +92,15 @@ public class GameManager : MonoBehaviour {
     //分布填充
     public bool Fill() {
         bool notFinished = false;//本次填充是否完成
-        for (int y = yRow-2; y >=0 ; y--) {
+        for (int y = yRow - 2; y >= 0; y--) {
             for (int x = 0; x < xCol; x++) {
                 ModelBase model = models[x, y];//当前元素的基础组件
                 //向下填充空缺
                 if (model.CanMove()) {
                     ModelBase modelBelow = models[x, y + 1];//正下方model组件
-                    if (modelBelow.Type==ModelType.Empty) {//垂直填充
+                    if (modelBelow.Type == ModelType.Empty) {//垂直填充
                         Destroy(modelBelow.gameObject);
-                        model.ModelMoveComponent.Move(x,y+1,fillTime);//向下移动
+                        model.ModelMoveComponent.Move(x, y + 1, fillTime);//向下移动
                         models[x, y + 1] = model;//正下方的组件指向当前组件
                         CreatNewModel(x, y, ModelType.Empty);//当前元素置空
                         notFinished = true;
@@ -143,16 +142,16 @@ public class GameManager : MonoBehaviour {
             }
         }
         //最底下的一层
-        for (int x = 0; x <xCol ; x++) {
+        for (int x = 0; x < xCol; x++) {
             ModelBase model = models[x, 0];//当前元素的基础组件
-            if (model.Type==ModelType.Empty) {
+            if (model.Type == ModelType.Empty) {
                 //在y坐标为-1的位置生成
-                GameObject newModel=Instantiate(modelPrefabDict[ModelType.Normal], CalGridPos(x, -1), Quaternion.identity);
+                GameObject newModel = Instantiate(modelPrefabDict[ModelType.Normal], CalGridPos(x, -1), Quaternion.identity);
                 newModel.transform.parent = this.transform;//设置父物体
                 models[x, 0] = newModel.GetComponent<ModelBase>();//更新基础组件位置
-                models[x,0].Init(x,-1,this,ModelType.Normal);//初始化
+                models[x, 0].Init(x, -1, this, ModelType.Normal);//初始化
                 if (models[x, 0].CanMove()) {
-                    models[x,0].ModelMoveComponent.Move(x,0,fillTime);//向下移动
+                    models[x, 0].ModelMoveComponent.Move(x, 0, fillTime);//向下移动
                 }
                 //随机一个颜色
                 models[x, 0].ModelColorComponent.SetColor((ModelColor.ColorType)Random.Range(0, models[x, 0].ModelColorComponent.Nums));
@@ -162,18 +161,20 @@ public class GameManager : MonoBehaviour {
         return notFinished;
     }
     //是否相邻判定
-    public bool IsNeighbor(ModelBase m1,ModelBase m2) {
-        return m1.X == m2.X && Mathf.Abs(m1.Y - m2.Y) ==1 || m1.Y == m2.Y && Mathf.Abs(m1.X - m2.X) ==1;
+    public bool IsNeighbor(ModelBase m1, ModelBase m2) {
+        return m1.X == m2.X && Mathf.Abs(m1.Y - m2.Y) == 1 || m1.Y == m2.Y && Mathf.Abs(m1.X - m2.X) == 1;
     }
     //交换model
     private void ExchangeModel(ModelBase m1, ModelBase m2) {
-        if (m1.CanMove()&&m2.CanMove()) {
+        if (m1.CanMove() && m2.CanMove()) {
             models[m1.X, m1.Y] = m2;
             models[m2.X, m2.Y] = m1;
             int tempX = m1.X;
             int tempY = m1.Y;
-            m1.ModelMoveComponent.Move(m2.X,m2.Y,fillTime);//交换
+            m1.ModelMoveComponent.Move(m2.X, m2.Y, fillTime);//交换
             m2.ModelMoveComponent.Move(tempX, tempY, fillTime);
+
+
         }
     }
     //选中对象
@@ -186,8 +187,9 @@ public class GameManager : MonoBehaviour {
     }
     //鼠标抬起,model交换
     public void ReleaseModel() {
-        if (IsNeighbor(selectModel,targetModel)) {
-            ExchangeModel(selectModel,targetModel);
+        if (IsNeighbor(selectModel, targetModel)) {
+            ExchangeModel(selectModel, targetModel);
         }
     }
+    //匹配model
 }
