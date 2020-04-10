@@ -27,7 +27,6 @@ public class ModelBase : MonoBehaviour {
         set { type = value; }
     }
     public GameManager manager;
-
     private ModelMove modelMoveComponent;
     public ModelMove ModelMoveComponent {
         get { return modelMoveComponent; }
@@ -46,12 +45,10 @@ public class ModelBase : MonoBehaviour {
     public bool CanColor() {
         return modelColorComponent != null;
     }
-    // Use this for initialization
     void Start () {
 		
 	}
-	
-	// Update is called once per frame
+
 	void Update () {
 		
 	}
@@ -61,5 +58,15 @@ public class ModelBase : MonoBehaviour {
         y = _y;
         manager = _manager;
         type = _type;
+    }
+
+    public void OnMouseEnter() {
+        manager.TargetModel(this);//设置目标
+    }
+    public void OnMouseDown() {
+        manager.SelectModel(this);//选中model
+    }
+    public void OnMouseUp() {
+        manager.ReleaseModel();
     }
 }

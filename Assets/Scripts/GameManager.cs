@@ -13,6 +13,8 @@ public class GameManager : MonoBehaviour {
     public int yRow;//行
     public GameObject gridPrefab;
 
+    public ModelBase selectModel;//鼠标点击的当前对象
+    public ModelBase targetModel;//玩家目的移动对象
     //种类
     public enum ModelType {
         //空,默认,障碍物,行消除,列消除,彩虹道具
@@ -158,5 +160,34 @@ public class GameManager : MonoBehaviour {
             }
         }
         return notFinished;
+    }
+    //是否相邻判定
+    public bool IsNeighbor(ModelBase m1,ModelBase m2) {
+        return m1.X == m2.X && Mathf.Abs(m1.Y - m2.Y) ==1 || m1.Y == m2.Y && Mathf.Abs(m1.X - m2.X) ==1;
+    }
+    //交换model
+    private void ExchangeModel(ModelBase m1, ModelBase m2) {
+        if (m1.CanMove()&&m2.CanMove()) {
+            models[m1.X, m1.Y] = m2;
+            models[m2.X, m2.Y] = m1;
+            int tempX = m1.X;
+            int tempY = m1.Y;
+            m1.ModelMoveComponent.Move(m2.X,m2.Y,fillTime);//交换
+            m2.ModelMoveComponent.Move(tempX, tempY, fillTime);
+        }
+    }
+    //选中对象
+    public void SelectModel(ModelBase m) {
+        selectModel = m;
+    }
+    //目标对象
+    public void TargetModel(ModelBase m) {
+        targetModel = m;
+    }
+    //鼠标抬起,model交换
+    public void ReleaseModel() {
+        if (IsNeighbor(selectModel,targetModel)) {
+            ExchangeModel(selectModel,targetModel);
+        }
     }
 }
