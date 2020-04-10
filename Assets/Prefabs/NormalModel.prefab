@@ -19,6 +19,9 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 4708315959850326}
+  - component: {fileID: 114291681519450526}
+  - component: {fileID: 114250750369179052}
+  - component: {fileID: 114297689640302842}
   m_Layer: 0
   m_Name: NormalModel
   m_TagString: Untagged
@@ -69,6 +72,55 @@ Transform:
   m_Father: {fileID: 4708315959850326}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &114250750369179052
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1281048300766900}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d8a260233c2269546bab0f109a839872, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  modelBase: {fileID: 0}
+--- !u!114 &114291681519450526
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1281048300766900}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9ccf7d3630cd74458ba46ee128d9068, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  manager: {fileID: 0}
+--- !u!114 &114297689640302842
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1281048300766900}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 87a7f5b1c27a1864294fa4b17f65adc7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  colorSprites:
+  - color: 0
+    sprite: {fileID: 21300000, guid: 7bd90880b5fa36b4f838cb504cd8095a, type: 3}
+  - color: 1
+    sprite: {fileID: 21300002, guid: 7bd90880b5fa36b4f838cb504cd8095a, type: 3}
+  - color: 2
+    sprite: {fileID: 21300004, guid: 7bd90880b5fa36b4f838cb504cd8095a, type: 3}
+  - color: 3
+    sprite: {fileID: 21300006, guid: 7bd90880b5fa36b4f838cb504cd8095a, type: 3}
+  - color: 4
+    sprite: {fileID: 21300008, guid: 7bd90880b5fa36b4f838cb504cd8095a, type: 3}
+  - color: 5
+    sprite: {fileID: 21300010, guid: 7bd90880b5fa36b4f838cb504cd8095a, type: 3}
+  sprite: {fileID: 0}
 --- !u!212 &212500170100343428
 SpriteRenderer:
   m_ObjectHideFlags: 1
@@ -102,7 +154,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_Sprite: {fileID: 21300000, guid: 7bd90880b5fa36b4f838cb504cd8095a, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0

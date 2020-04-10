@@ -10,6 +10,7 @@ TextureImporter:
     21300010: map_5
     21300012: map_6
     21300014: map_7
+    21300016: map_8
   externalObjects: {}
   serializedVersion: 4
   mipmaps:
@@ -83,6 +84,16 @@ TextureImporter:
     allowsAlphaSplitting: 0
     overridden: 0
     androidETC2FallbackOverride: 0
+  - buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    androidETC2FallbackOverride: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
@@ -90,12 +101,12 @@ TextureImporter:
       name: map_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 952
-        width: 69
-        height: 72
+        x: 2
+        y: 956
+        width: 65
+        height: 65
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -105,11 +116,11 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 69
-        y: 958
-        width: 68
-        height: 66
+        y: 957
+        width: 65
+        height: 65
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -119,11 +130,11 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 136
-        y: 951
-        width: 84
-        height: 73
+        y: 959
+        width: 65
+        height: 65
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -132,12 +143,12 @@ TextureImporter:
       name: map_3
       rect:
         serializedVersion: 2
-        x: 0
-        y: 892
-        width: 66
-        height: 61
+        x: 1
+        y: 889
+        width: 65
+        height: 65
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -146,12 +157,12 @@ TextureImporter:
       name: map_4
       rect:
         serializedVersion: 2
-        x: 73
-        y: 889
-        width: 61
-        height: 64
+        x: 69
+        y: 888
+        width: 65
+        height: 65
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -160,12 +171,12 @@ TextureImporter:
       name: map_5
       rect:
         serializedVersion: 2
-        x: 137
+        x: 139
         y: 890
-        width: 81
-        height: 67
+        width: 65
+        height: 65
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -179,7 +190,7 @@ TextureImporter:
         width: 69
         height: 69
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -193,7 +204,21 @@ TextureImporter:
         width: 69
         height: 80
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: map_8
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 958
+        width: 65
+        height: 65
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
