@@ -85,7 +85,6 @@ public class GameManager : MonoBehaviour {
             //清除匹配的model
             needFill = ClearAllMatchModels();
         }
-
     }
     //分布填充
     public bool Fill() {
@@ -174,10 +173,11 @@ public class GameManager : MonoBehaviour {
                 //Debug.Log("可以交换");
                 m1.ModelMoveComponent.Move(m2.X, m2.Y, fillTime);//交换
                 m2.ModelMoveComponent.Move(tempX, tempY, fillTime);
-                ClearAllMatchModels();
+                ClearAllMatchModels();//清除所有匹配的model
+                StartCoroutine(FillAll());//将消除后的空位进行填充
             }
             else {
-                Debug.Log("不可以交换");
+                //Debug.Log("不可以交换");
                 //还原基础脚本
                 models[m1.X, m1.Y] = m1;
                 models[m2.X, m2.Y] = m2;
@@ -273,9 +273,9 @@ public class GameManager : MonoBehaviour {
                     }
                 }
             }
-            if (match.Count >= 3) {
-                return match;
-            }
+            //if (match.Count >= 3) {
+            //    return match;
+            //}
             matchRow.Clear();
             matchCol.Clear();
             matchCol.Add(model);
