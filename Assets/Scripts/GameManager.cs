@@ -1,10 +1,15 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour {
     //单例
     private static GameManager _instance;
+    public GameObject pausePanel;
+    public GameObject aboutUs;
+    public GameObject audioOnOff;
+    public bool canAudio;
     public static GameManager instance {
         get { return _instance; }
         set { _instance = value; }
@@ -34,6 +39,13 @@ public class GameManager : MonoBehaviour {
     public float fillTime = 0.1f;
     void Awake() {
         instance = this;
+        canAudio = true;
+        if (canAudio) {
+            Camera.main.GetComponent<AudioSource>().Play();
+        }
+        else {
+            Camera.main.GetComponent<AudioSource>().Stop();
+        }
     }
     void Start() {
         models = new ModelBase[xCol, yRow];
@@ -181,9 +193,7 @@ public class GameManager : MonoBehaviour {
                 //还原基础脚本
                 models[m1.X, m1.Y] = m1;
                 models[m2.X, m2.Y] = m2;
-
-                //仅交换位置
-                models[m1.X, m1.Y].ModelMoveComponent.Origin(m1, m2, fillTime);
+                models[m1.X, m1.Y].ModelMoveComponent.Undo(m1, m2, fillTime);//交换位置再还原
             }
         }
     }
@@ -377,5 +387,49 @@ public class GameManager : MonoBehaviour {
             }
         }
         return needFill;
+    }
+
+    public void Pause() {
+        pausePanel.SetActive(true);
+        pausePanel.GetComponent<Animator>().SetTrigger("open");
+    }
+
+    public void Resume() {
+        Time.timeScale = 1;
+        pausePanel.GetComponent<Animator>().SetTrigger("close");
+    }
+
+    public void Replay() {
+        Time.timeScale = 1;
+        SceneManager.LoadScene(1);
+    }
+
+    public void Quit() {
+        SceneManager.LoadScene(0);
+    }
+
+    public void AboutUsDisplay() {
+        Time.timeScale = 1;
+        pausePanel.GetComponent<Animator>().SetTrigger("close");
+        aboutUs.SetActive(true);
+        aboutUs.GetComponent<Animator>().SetTrigger("display");
+    }
+
+    public void AboutUsClose() {
+        Time.timeScale = 1;
+        aboutUs.GetComponent<Animator>().SetTrigger("close");
+    }
+
+    public void AudioController() {
+        if (canAudio) {
+            canAudio = false;
+            audioOnOff.SetActive(true);
+            Camera.main.GetComponent<AudioSource>().Stop();
+        }
+        else {
+            canAudio = true;
+            audioOnOff.SetActive(false);
+            Camera.main.GetComponent<AudioSource>().Play();
+        }
     }
 }

@@ -4,9 +4,11 @@ using UnityEngine;
 
 public class ModelMove : MonoBehaviour {
     public ModelBase modelBase;//基础脚本
-    private IEnumerator moveCoroutine;//
-    public IEnumerator originCoroutine;
+    private IEnumerator moveCoroutine;//移动协程
+    public IEnumerator undoCoroutine;
+    public bool isPlaying;
     void Awake() {
+        isPlaying = false;
         modelBase = GetComponent<ModelBase>();
     }
     void Start() {
@@ -38,16 +40,14 @@ public class ModelMove : MonoBehaviour {
         modelBase.transform.position = endPos;
     }
 
-    public bool isPlaying = false;
-    public void Origin(ModelBase m1, ModelBase m2, float time) {
-        //更改属性
-        originCoroutine = OriginCoroutine(m1, m2, time);
+    //无法消除的model还原方法
+    public void Undo(ModelBase m1, ModelBase m2, float time) {
+        undoCoroutine =UndoCoroutine(m1, m2, time);
         if (isPlaying == false) {
-            StartCoroutine(originCoroutine);
+            StartCoroutine(undoCoroutine);
         }
     }
-
-    private IEnumerator OriginCoroutine(ModelBase m1, ModelBase m2, float time) {
+    private IEnumerator UndoCoroutine(ModelBase m1, ModelBase m2, float time) {
         isPlaying = true;
         //每一帧都去移动
         Vector3 m1pos = GameManager.instance.CalGridPos(m1.X, m1.Y);
