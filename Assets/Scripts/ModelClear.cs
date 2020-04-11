@@ -8,7 +8,6 @@ public class ModelClear : MonoBehaviour {
     public bool IsClearing {
         get { return isClearing; }
     }
-
     public ModelBase modelBase;
 
     public virtual void Clear() {
@@ -19,7 +18,8 @@ public class ModelClear : MonoBehaviour {
     public IEnumerator ClearCoroutine() {
         Animator animator = GetComponent<Animator>();
         if (animator!=null) {
-            animator.Play(destoryAnim.name);//播放清除动画
+            animator.SetTrigger("clear");
+            //animator.Play(destoryAnim.name);//播放清除动画
             //玩家分数,音效
             yield return new WaitForSeconds(destoryAnim.length);//等待清除动画播放的时间
             Destroy(this.gameObject);

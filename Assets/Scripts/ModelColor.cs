@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class ModelColor : MonoBehaviour {
     public enum ColorType {
-        Blue,Green,Red,Purple,Pink,Yellow,Award,Count
+        Blue,Green,Red,Purple,Pink,Award,Count
     }
 
     private ColorType color;
@@ -23,7 +23,12 @@ public class ModelColor : MonoBehaviour {
     public int Nums {
         get { return colorSprites.Length; }
     }
+
+    public Animator anim;
+    private IEnumerator ie;
     void Awake() {
+        anim = GetComponent<Animator>();
+        ie = Idle();
         sprite = transform.GetChild(0).GetComponent<SpriteRenderer>();
         //为字典填充值
         colorSpriteDict=new Dictionary<ColorType, Sprite>();
@@ -35,9 +40,16 @@ public class ModelColor : MonoBehaviour {
 
     }
     void Start() {
-
+        StartCoroutine(ie);
     }
 
+    IEnumerator Idle() {
+        while (true) {
+            yield return new WaitForSeconds(Random.Range(0, 50));
+        anim.SetTrigger("idle");
+        }
+        
+    }
     // Update is called once per frame
     void Update() {
 
@@ -48,5 +60,9 @@ public class ModelColor : MonoBehaviour {
         if (colorSpriteDict.ContainsKey(newColor)) {
             sprite.sprite =colorSpriteDict[newColor];
         }
+    }
+
+    void OnDestroy() {
+        StopCoroutine(ie);
     }
 }

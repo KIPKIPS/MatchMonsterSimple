@@ -76,9 +76,16 @@ public class GameManager : MonoBehaviour {
     }
     //全部填充
     public IEnumerator FillAll() {
-        while (Fill()) {
+        bool needFill = true;
+        while (needFill) {
             yield return new WaitForSeconds(fillTime);
+            while (Fill()) {
+                yield return new WaitForSeconds(fillTime);
+            }
+            //清除匹配的model
+            needFill = ClearAllMatchModels();
         }
+
     }
     //分布填充
     public bool Fill() {
@@ -161,17 +168,22 @@ public class GameManager : MonoBehaviour {
         if (m1.CanMove() && m2.CanMove()) {
             models[m1.X, m1.Y] = m2;
             models[m2.X, m2.Y] = m1;
-            if (MatchModels(m2,m1.X,m1.Y)!=null|| MatchModels(m1, m2.X, m2.Y) != null ) {
+            int tempX = m1.X;
+            int tempY = m1.Y;
+            if (MatchModels(m2, m1.X, m1.Y) != null || MatchModels(m1, m2.X, m2.Y) != null) {
                 //Debug.Log("可以交换");
-                int tempX = m1.X;
-                int tempY = m1.Y;
                 m1.ModelMoveComponent.Move(m2.X, m2.Y, fillTime);//交换
                 m2.ModelMoveComponent.Move(tempX, tempY, fillTime);
+                ClearAllMatchModels();
             }
             else {
                 Debug.Log("不可以交换");
+                //还原基础脚本
                 models[m1.X, m1.Y] = m1;
                 models[m2.X, m2.Y] = m2;
+
+                //仅交换位置
+                models[m1.X, m1.Y].ModelMoveComponent.Origin(m1, m2, fillTime);
             }
         }
     }
@@ -193,7 +205,7 @@ public class GameManager : MonoBehaviour {
     public List<ModelBase> MatchModels(ModelBase model, int newX, int newY) {
         if (model.CanColor()) {
             ModelColor.ColorType color = model.ModelColorComponent.Color;
-            List<ModelBase> matchRow=new List<ModelBase>();//存取行
+            List<ModelBase> matchRow = new List<ModelBase>();//存取行
             List<ModelBase> matchCol = new List<ModelBase>();//存取列
             List<ModelBase> match = new List<ModelBase>();//存取全部可消除的列表
             //行匹配
@@ -336,5 +348,34 @@ public class GameManager : MonoBehaviour {
             }
         }
         return null;
+    }
+
+    public bool ClearModel(int x, int y) {
+        //当前model可以清除并且没有正在清除
+        if (models[x, y].CanClear() && models[x, y].ModelClearComponent.IsClearing == false) {
+            models[x, y].ModelClearComponent.Clear();//将model清除掉
+            CreatNewModel(x, y, ModelType.Empty);//原地生成一个新的空类型
+            return true;
+        }
+        return false;
+    }
+    //清除匹配的model
+    public bool ClearAllMatchModels() {
+        bool needFill = false;
+        for (int y = 0; y < yRow; y++) {
+            for (int x = 0; x < xCol; x++) {
+                if (models[x, y].CanClear()) {
+                    List<ModelBase> matchList = MatchModels(models[x, y], x, y);
+                    if (matchList != null) {
+                        foreach (var m in matchList) {
+                            if (ClearModel(m.X, m.Y)) {
+                                needFill = true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return needFill;
     }
 }

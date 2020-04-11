@@ -35,9 +35,17 @@ public class ModelBase : MonoBehaviour {
     public ModelColor ModelColorComponent {
         get { return modelColorComponent; }
     }
+    private ModelClear modelClearComponent;
+    public ModelClear ModelClearComponent {
+        get { return modelClearComponent; }
+    }
     void Awake() {
+        modelClearComponent = GetComponent<ModelClear>();
         modelMoveComponent = GetComponent<ModelMove>();
         modelColorComponent = GetComponent<ModelColor>();
+    }
+    public bool CanClear() {
+        return modelClearComponent != null;
     }
     public bool CanMove() {
         return modelMoveComponent != null;

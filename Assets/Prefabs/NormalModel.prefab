@@ -22,6 +22,7 @@ GameObject:
   - component: {fileID: 114291681519450526}
   - component: {fileID: 114250750369179052}
   - component: {fileID: 114297689640302842}
+  - component: {fileID: 114440653379279014}
   - component: {fileID: 65775660965283282}
   - component: {fileID: 95128144755249376}
   m_Layer: 0
@@ -115,6 +116,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   modelBase: {fileID: 0}
+  isPlaying: 0
 --- !u!114 &114291681519450526
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -149,9 +151,21 @@ MonoBehaviour:
     sprite: {fileID: 21300006, guid: 7bd90880b5fa36b4f838cb504cd8095a, type: 3}
   - color: 4
     sprite: {fileID: 21300008, guid: 7bd90880b5fa36b4f838cb504cd8095a, type: 3}
-  - color: 5
-    sprite: {fileID: 21300010, guid: 7bd90880b5fa36b4f838cb504cd8095a, type: 3}
   sprite: {fileID: 0}
+  anim: {fileID: 0}
+--- !u!114 &114440653379279014
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1281048300766900}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b2fd295020b473446bd177b2efc35bc1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  destoryAnim: {fileID: 7400000, guid: dc88c8305534d8e4bb765ec3a4dbcc4c, type: 2}
+  modelBase: {fileID: 0}
 --- !u!212 &212500170100343428
 SpriteRenderer:
   m_ObjectHideFlags: 1
