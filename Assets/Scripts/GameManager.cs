@@ -173,8 +173,6 @@ public class GameManager : MonoBehaviour {
             int tempY = m1.Y;
             m1.ModelMoveComponent.Move(m2.X, m2.Y, fillTime);//交换
             m2.ModelMoveComponent.Move(tempX, tempY, fillTime);
-
-
         }
     }
     //选中对象
@@ -192,4 +190,5 @@ public class GameManager : MonoBehaviour {
         }
     }
     //匹配model
+    
 }
