@@ -237,6 +237,7 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\GameManager.cs" />
     <Compile Include="Assets\Scripts\ModelBase.cs" />
+    <Compile Include="Assets\Scripts\ModelClear.cs" />
     <Compile Include="Assets\Scripts\ModelColor.cs" />
     <Compile Include="Assets\Scripts\ModelMove.cs" />
   </ItemGroup>

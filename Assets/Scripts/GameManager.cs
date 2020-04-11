@@ -55,15 +55,6 @@ public class GameManager : MonoBehaviour {
         //实例化模型
         for (int x = 0; x < xCol; x++) {
             for (int y = 0; y < yRow; y++) {
-                //GameObject newModel = Instantiate(modelPrefabDict[ModelType.Normal], CalGridPos(x, y), Quaternion.identity);
-                //newModel.transform.parent = this.transform;//将格子的父物体设置为GameManager
-                //models[x, y] = newModel.GetComponent<ModelBase>();//获取组件
-                //models[x, y].Init(x, y, this, ModelType.Normal);//初始化
-                //models[x,y].ModelMoveComponent.Move(x,0);//移动测试
-                //随机颜色
-                //if (models[x, y].CanColor()) {
-                //    models[x, y].ModelColorComponent.SetColor((ModelColor.ColorType)Random.Range(0, models[x, y].ModelColorComponent.Nums));
-                //}
                 CreatNewModel(x, y, ModelType.Empty);
             }
         }
@@ -166,13 +157,22 @@ public class GameManager : MonoBehaviour {
     }
     //交换model
     private void ExchangeModel(ModelBase m1, ModelBase m2) {
+        //Debug.Log(selectModel.ModelColorComponent.Color+" "+targetModel.ModelColorComponent.Color);
         if (m1.CanMove() && m2.CanMove()) {
             models[m1.X, m1.Y] = m2;
             models[m2.X, m2.Y] = m1;
-            int tempX = m1.X;
-            int tempY = m1.Y;
-            m1.ModelMoveComponent.Move(m2.X, m2.Y, fillTime);//交换
-            m2.ModelMoveComponent.Move(tempX, tempY, fillTime);
+            if (MatchModels(m2,m1.X,m1.Y)!=null|| MatchModels(m1, m2.X, m2.Y) != null ) {
+                //Debug.Log("可以交换");
+                int tempX = m1.X;
+                int tempY = m1.Y;
+                m1.ModelMoveComponent.Move(m2.X, m2.Y, fillTime);//交换
+                m2.ModelMoveComponent.Move(tempX, tempY, fillTime);
+            }
+            else {
+                Debug.Log("不可以交换");
+                models[m1.X, m1.Y] = m1;
+                models[m2.X, m2.Y] = m2;
+            }
         }
     }
     //选中对象
@@ -190,5 +190,151 @@ public class GameManager : MonoBehaviour {
         }
     }
     //匹配model
-    
+    public List<ModelBase> MatchModels(ModelBase model, int newX, int newY) {
+        if (model.CanColor()) {
+            ModelColor.ColorType color = model.ModelColorComponent.Color;
+            List<ModelBase> matchRow=new List<ModelBase>();//存取行
+            List<ModelBase> matchCol = new List<ModelBase>();//存取列
+            List<ModelBase> match = new List<ModelBase>();//存取全部可消除的列表
+            //行匹配
+            matchRow.Add(model);
+            //i=0代表往左，i=1代表往右
+            for (int i = 0; i <= 1; i++) {
+                for (int xDistance = 1; xDistance < xCol; xDistance++) {
+                    int x;
+                    if (i == 0) {
+                        x = newX - xDistance;
+                    }
+                    else {
+                        x = newX + xDistance;
+                    }
+                    if (x < 0 || x >= xCol) {
+                        break;
+                    }
+                    if (models[x, newY].CanColor() && models[x, newY].ModelColorComponent.Color == color) {
+                        matchRow.Add(models[x, newY]);
+                    }
+                    else {
+                        break;
+                    }
+                }
+            }
+            if (matchRow.Count >= 3) {
+                for (int i = 0; i < matchRow.Count; i++) {
+                    match.Add(matchRow[i]);
+                }
+            }
+            //L T型匹配
+            //检查一下当前行遍历列表中的元素数量是否大于3
+            if (matchRow.Count >= 3) {
+                for (int i = 0; i < matchRow.Count; i++) {
+                    //行匹配列表中满足匹配条件的每个元素上下依次进行列遍历
+                    // 0代表上方 1代表下方
+                    for (int j = 0; j <= 1; j++) {
+                        for (int yDistance = 1; yDistance < yRow; yDistance++) {
+                            int y;
+                            if (j == 0) {
+                                y = newY - yDistance;
+                            }
+                            else {
+                                y = newY + yDistance;
+                            }
+                            if (y < 0 || y >= yRow) {
+                                break;
+                            }
+                            if (models[matchRow[i].X, y].CanColor() && models[matchRow[i].X, y].ModelColorComponent.Color == color) {
+                                matchCol.Add(models[matchRow[i].X, y]);
+                            }
+                            else {
+                                break;
+                            }
+                        }
+                    }
+                    if (matchCol.Count < 2) {
+                        matchCol.Clear();
+                    }
+                    else {
+                        for (int j = 0; j < matchCol.Count; j++) {
+                            match.Add(matchCol[j]);
+                        }
+                        break;
+                    }
+                }
+            }
+            if (match.Count >= 3) {
+                return match;
+            }
+            matchRow.Clear();
+            matchCol.Clear();
+            matchCol.Add(model);
+            //列匹配
+            //i=0代表往左，i=1代表往右
+            for (int i = 0; i <= 1; i++) {
+                for (int yDistance = 1; yDistance < yRow; yDistance++) {
+                    int y;
+                    if (i == 0) {
+                        y = newY - yDistance;
+                    }
+                    else {
+                        y = newY + yDistance;
+                    }
+                    if (y < 0 || y >= yRow) {
+                        break;
+                    }
+                    if (models[newX, y].CanColor() && models[newX, y].ModelColorComponent.Color == color) {
+                        matchCol.Add(models[newX, y]);
+                    }
+                    else {
+                        break;
+                    }
+                }
+            }
+            if (matchCol.Count >= 3) {
+                for (int i = 0; i < matchCol.Count; i++) {
+                    match.Add(matchCol[i]);
+                }
+            }
+            //L T型匹配
+            //检查一下当前行遍历列表中的元素数量是否大于3
+            if (matchCol.Count >= 3) {
+                for (int i = 0; i < matchCol.Count; i++) {
+                    //行匹配列表中满足匹配条件的每个元素上下依次进行列遍历
+                    // 0代表上方 1代表下方
+                    for (int j = 0; j <= 1; j++) {
+                        for (int xDistance = 1; xDistance < xCol; xDistance++) {
+                            int x;
+                            if (j == 0) {
+                                x = newY - xDistance;
+                            }
+                            else {
+                                x = newY + xDistance;
+                            }
+                            if (x < 0 || x >= xCol) {
+                                break;
+                            }
+                            if (models[x, matchCol[i].Y].CanColor() && models[x, matchCol[i].Y].ModelColorComponent.Color == color) {
+                                matchRow.Add(models[x, matchCol[i].Y]);
+                            }
+                            else {
+                                break;
+                            }
+                        }
+                    }
+                    if (matchRow.Count < 2) {
+                        matchRow.Clear();
+                    }
+                    else {
+                        for (int j = 0; j < matchRow.Count; j++) {
+                            match.Add(matchRow[j]);
+                        }
+                        break;
+                    }
+                }
+            }
+            if (match.Count >= 3) {
+                return match;
+            }
+        }
+        return null;
+    }
 }
