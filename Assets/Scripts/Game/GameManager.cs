@@ -55,11 +55,13 @@ public class GameManager : MonoBehaviour {
         //PlayerPrefs.SetInt("HistoryHighestScore", 0);
         gameover = false;
         instance = this;
-        canAudio = true;
+        canAudio = PlayerPrefs.GetInt("Audio", 1)==1;
         if (canAudio) {
+            audioOnOff.SetActive(false);
             Camera.main.GetComponent<AudioSource>().Play();
         }
         else {
+            audioOnOff.SetActive(true);
             Camera.main.GetComponent<AudioSource>().Stop();
         }
     }
@@ -579,7 +581,7 @@ public class GameManager : MonoBehaviour {
     public void Replay() {
         Time.timeScale = 1;
         gameoverPanel.GetComponent<Animator>().SetTrigger("close");
-        SceneManager.LoadScene(1);
+        SceneManager.LoadScene(2);
     }
     public void Quit() {
         Time.timeScale = 1;
@@ -607,11 +609,13 @@ public class GameManager : MonoBehaviour {
             canAudio = false;
             audioOnOff.SetActive(true);
             Camera.main.GetComponent<AudioSource>().Stop();
+            PlayerPrefs.SetInt("Audio", 0);
         }
         else {
             canAudio = true;
             audioOnOff.SetActive(false);
             Camera.main.GetComponent<AudioSource>().Play();
+            PlayerPrefs.SetInt("Audio", 1);
         }
     }
 
