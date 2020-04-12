@@ -14,6 +14,9 @@ public class AboutUs : MonoBehaviour {
 		
 	}
 
+    public void TimeScale() {
+        Time.timeScale = 0;
+    }
     public void AboutUsAnimateEnd() {
         //Debug.Log("end");
         this.gameObject.SetActive(false);

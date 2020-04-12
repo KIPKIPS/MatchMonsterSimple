@@ -9,7 +9,7 @@ public class ModelClear : MonoBehaviour {
         get { return isClearing; }
     }
     public ModelBase modelBase;
-
+    public AudioClip destoryNormalAudio;
     public virtual void Clear() {
         isClearing = true;
         StartCoroutine(ClearCoroutine());
@@ -20,7 +20,10 @@ public class ModelClear : MonoBehaviour {
         if (animator!=null) {
             animator.SetTrigger("clear");
             //animator.Play(destoryAnim.name);//播放清除动画
-            //玩家分数,音效
+            //TODO:音效
+            if (GameManager.instance.canAudio) {
+                AudioSource.PlayClipAtPoint(destoryNormalAudio,this.transform.position);
+            }
             yield return new WaitForSeconds(destoryAnim.length);//等待清除动画播放的时间
             Destroy(this.gameObject);
         }

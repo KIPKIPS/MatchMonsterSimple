@@ -2,14 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour {
     //单例
     private static GameManager _instance;
-    public GameObject pausePanel;
-    public GameObject aboutUs;
-    public GameObject audioOnOff;
-    public bool canAudio;
     public static GameManager instance {
         get { return _instance; }
         set { _instance = value; }
@@ -34,10 +31,30 @@ public class GameManager : MonoBehaviour {
     }
     //结构体数组
     public ModelPrefab[] modelPrefabs;
-    //二维数组
-    public ModelBase[,] models;
-    public float fillTime = 0.1f;
+    public ModelBase[,] models;//二维数组
+    public float fillTime = 0.1f;//填充时间间隔
+    //audio
+    public AudioClip[] audios;
+    //UI控制相关
+    public GameObject pausePanel;
+    public GameObject aboutUs;
+    public GameObject audioOnOff;
+    public bool canAudio;
+    public Text scoreText;//score
+    public Text restTimeText;//time
+    public float gameTime=60f;
+    private bool gameover;
+    public int score;
+    public GameObject gameoverPanel;
+    public Text overScoreText;
+    public Text historySoreText;
+    public GameObject breakRecord;
+    public Transform spawn;
+    public GameObject[] excellent;
+    public float addScoreTime;
+    private float curScore;
     void Awake() {
+        gameover = false;
         instance = this;
         canAudio = true;
         if (canAudio) {
@@ -73,6 +90,33 @@ public class GameManager : MonoBehaviour {
         Destroy(models[4, 4].gameObject);
         CreatNewModel(4, 4, ModelType.Wall);
         StartCoroutine(FillAll());
+    }
+
+    void Update() {
+        if (gameover) {
+            return;
+        }
+        gameTime -= Time.deltaTime;
+        if (gameTime<=0) {
+            gameTime = 0;
+            //TODO:失败处理
+            gameover = true;
+            gameoverPanel.SetActive(true);
+            GameOver();
+            return;
+        }
+        restTimeText.text = gameTime.ToString("0");//0取整,0.0保留一位小数,0.00保留两位小数......
+        if (addScoreTime <= 0.05f) {
+            addScoreTime += Time.deltaTime;
+        }
+        else {
+            if (curScore<score) {
+                curScore+=10;
+                scoreText.text = curScore+"";
+                addScoreTime = 0;
+            }
+        }
+        
     }
     //计算格子的位置坐标
     public Vector3 CalGridPos(int x, int y) {
@@ -199,14 +243,23 @@ public class GameManager : MonoBehaviour {
     }
     //选中对象
     public void SelectModel(ModelBase m) {
+        if (gameover) {
+            return;
+        }
         selectModel = m;
     }
     //目标对象
     public void TargetModel(ModelBase m) {
+        if (gameover) {
+            return;
+        }
         targetModel = m;
     }
     //鼠标抬起,model交换
     public void ReleaseModel() {
+        if (gameover) {
+            return;
+        }
         if (IsNeighbor(selectModel, targetModel)) {
             ExchangeModel(selectModel, targetModel);
         }
@@ -377,10 +430,26 @@ public class GameManager : MonoBehaviour {
                 if (models[x, y].CanClear()) {
                     List<ModelBase> matchList = MatchModels(models[x, y], x, y);
                     if (matchList != null) {
+                        int num = matchList.Count;
                         foreach (var m in matchList) {
                             if (ClearModel(m.X, m.Y)) {
                                 needFill = true;
                             }
+                        }
+                        //消除个数处理分数
+                        switch (num) {
+                            case 3: score += 10;
+                                break;
+                            case 4:
+                                Excellent(0);
+                                score += 20;break;
+                            case 5: score += 30;
+                                Excellent(1);
+                                break;
+                            case 6: score += 60; break;
+                            case 7: score += 150; break;
+                            case 8: score += 300; break;
+                            case 9: score += 500; break;
                         }
                     }
                 }
@@ -389,37 +458,52 @@ public class GameManager : MonoBehaviour {
         return needFill;
     }
 
+    //处理UI界面的事件
+    public void Excellent(int index) {
+        Instantiate(excellent[index], spawn);
+    }
     public void Pause() {
         pausePanel.SetActive(true);
         pausePanel.GetComponent<Animator>().SetTrigger("open");
+        if (canAudio) {
+            AudioSource.PlayClipAtPoint(audios[0],Camera.main.transform.position,1);
+        }
     }
 
     public void Resume() {
         Time.timeScale = 1;
         pausePanel.GetComponent<Animator>().SetTrigger("close");
+        if (canAudio) {
+            AudioSource.PlayClipAtPoint(audios[1], Camera.main.transform.position,1);
+        }
     }
 
     public void Replay() {
         Time.timeScale = 1;
+        gameoverPanel.GetComponent<Animator>().SetTrigger("close");
         SceneManager.LoadScene(1);
     }
-
     public void Quit() {
+        Time.timeScale = 1;
+        gameoverPanel.GetComponent<Animator>().SetTrigger("close");
         SceneManager.LoadScene(0);
     }
-
     public void AboutUsDisplay() {
         Time.timeScale = 1;
         pausePanel.GetComponent<Animator>().SetTrigger("close");
         aboutUs.SetActive(true);
         aboutUs.GetComponent<Animator>().SetTrigger("display");
+        if (canAudio) {
+            AudioSource.PlayClipAtPoint(audios[0], Camera.main.transform.position, 1);
+        }
     }
-
     public void AboutUsClose() {
         Time.timeScale = 1;
         aboutUs.GetComponent<Animator>().SetTrigger("close");
+        if (canAudio) {
+            AudioSource.PlayClipAtPoint(audios[1], Camera.main.transform.position, 1);
+        }
     }
-
     public void AudioController() {
         if (canAudio) {
             canAudio = false;
@@ -431,5 +515,15 @@ public class GameManager : MonoBehaviour {
             audioOnOff.SetActive(false);
             Camera.main.GetComponent<AudioSource>().Play();
         }
+    }
+
+    public void GameOver() {
+        if (score>PlayerPrefs.GetInt("HistoryHighestScore",0)) {
+            PlayerPrefs.SetInt("HistoryHighestScore",score);
+            breakRecord.SetActive(true);
+        }
+        gameoverPanel.GetComponent<Animator>().SetTrigger("display");
+        overScoreText.text = score.ToString();
+        historySoreText.text = PlayerPrefs.GetInt("HistoryHighestScore").ToString();
     }
 }
