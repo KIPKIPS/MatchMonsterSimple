@@ -244,6 +244,7 @@
     <Compile Include="Assets\Scripts\ModelBase.cs" />
     <Compile Include="Assets\Scripts\ModelClear.cs" />
     <Compile Include="Assets\Scripts\ModelColor.cs" />
+    <Compile Include="Assets\Scripts\ModelColorClearByType.cs" />
     <Compile Include="Assets\Scripts\ModelMove.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

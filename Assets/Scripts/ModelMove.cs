@@ -42,7 +42,7 @@ public class ModelMove : MonoBehaviour {
 
     //无法消除的model还原方法
     public void Undo(ModelBase m1, ModelBase m2, float time) {
-        undoCoroutine =UndoCoroutine(m1, m2, time);
+        undoCoroutine = UndoCoroutine(m1, m2, time);
         if (isPlaying == false) {
             StartCoroutine(undoCoroutine);
         }

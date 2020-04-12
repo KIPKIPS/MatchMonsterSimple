@@ -127,7 +127,7 @@ Animator:
   m_Avatar: {fileID: 0}
   m_Controller: {fileID: 9100000, guid: d86aceb3f356f7e42bb95dc968a15bc2, type: 2}
   m_CullingMode: 0
-  m_UpdateMode: 0
+  m_UpdateMode: 2
   m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
   m_WarningMessage: 
@@ -167,6 +167,10 @@ MonoBehaviour:
     sprite: {fileID: 21300004, guid: 7bd90880b5fa36b4f838cb504cd8095a, type: 3}
   - color: 3
     sprite: {fileID: 21300006, guid: 7bd90880b5fa36b4f838cb504cd8095a, type: 3}
+  - color: 4
+    sprite: {fileID: 21300000, guid: a76997927b1b4ab48b3d923f291a3b69, type: 3}
+  - color: 5
+    sprite: {fileID: 21300000, guid: 04b494836b15fe14d82b88d62fef5de2, type: 3}
   highlightSprites:
   - color: 0
     sprite: {fileID: 21300000, guid: 4636fe7cb797d064687735428cc47628, type: 3}
@@ -174,6 +178,10 @@ MonoBehaviour:
     sprite: {fileID: 21300002, guid: 4636fe7cb797d064687735428cc47628, type: 3}
   - color: 2
     sprite: {fileID: 21300004, guid: 4636fe7cb797d064687735428cc47628, type: 3}
+  - color: 4
+    sprite: {fileID: 21300000, guid: 255cce32ff0c4f640ac17654f0fd71b8, type: 3}
+  - color: 5
+    sprite: {fileID: 21300000, guid: 870a15a6b281771478e83f435bce7aa4, type: 3}
   - color: 3
     sprite: {fileID: 21300006, guid: 4636fe7cb797d064687735428cc47628, type: 3}
   sprite: {fileID: 0}

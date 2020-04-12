@@ -59,7 +59,9 @@ public class ModelColor : MonoBehaviour {
         }
     }
     void Start() {
-        StartCoroutine(ie);
+        if (GetComponent<ModelBase>().Type==GameManager.ModelType.Normal) {
+            StartCoroutine(ie);
+        }
     }
 
     IEnumerator Idle() {

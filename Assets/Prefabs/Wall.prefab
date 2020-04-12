@@ -115,6 +115,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   manager: {fileID: 0}
+  effect_Row: {fileID: 0}
+  effect_Col: {fileID: 0}
 --- !u!212 &212943183704925130
 SpriteRenderer:
   m_ObjectHideFlags: 1
