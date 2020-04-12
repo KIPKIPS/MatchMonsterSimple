@@ -10,13 +10,17 @@ public class ModelClear : MonoBehaviour {
     }
     public ModelBase modelBase;
     public AudioClip destoryNormalAudio;
+    Animator animator;
     public virtual void Clear() {
+        if (GetComponent<ModelBase>().Type==GameManager.ModelType.CrossClear) {
+            Debug.Log("x");
+        }
         isClearing = true;
         StartCoroutine(ClearCoroutine());
     }
 
     public IEnumerator ClearCoroutine() {
-        Animator animator = GetComponent<Animator>();
+        animator = GetComponent<Animator>();
         if (animator!=null) {
             animator.SetTrigger("clear");
             //animator.Play(destoryAnim.name);//播放清除动画
@@ -28,10 +32,18 @@ public class ModelClear : MonoBehaviour {
             Destroy(this.gameObject);
         }
     }
+
+    void Awake() {
+        modelBase = GetComponent<ModelBase>();
+    }
     void Start() {
 
     }
     void Update() {
 
+    }
+
+    void OnMouseDown() {
+        
     }
 }

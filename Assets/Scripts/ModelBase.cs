@@ -5,7 +5,7 @@ using UnityEngine;
 public class ModelBase : MonoBehaviour {
     private int x;
     public int X {
-        get { return x;}
+        get { return x; }
         set {
             if (CanMove()) {
                 x = value;
@@ -32,6 +32,8 @@ public class ModelBase : MonoBehaviour {
         get { return modelMoveComponent; }
     }
     private ModelColor modelColorComponent;
+    public GameObject effect_Row;
+    public GameObject effect_Col;
     public ModelColor ModelColorComponent {
         get { return modelColorComponent; }
     }
@@ -53,13 +55,13 @@ public class ModelBase : MonoBehaviour {
     public bool CanColor() {
         return modelColorComponent != null;
     }
-    void Start () {
-		
-	}
+    void Start() {
 
-	void Update () {
-		
-	}
+    }
+
+    void Update() {
+
+    }
     //初始化方法
     public void Init(int _x, int _y, GameManager _manager, GameManager.ModelType _type) {
         x = _x;
@@ -73,6 +75,21 @@ public class ModelBase : MonoBehaviour {
     }
     public void OnMouseDown() {
         manager.SelectModel(this);//选中model
+        if (GameManager.instance.lastSelectModel != GameManager.instance.selectModel) {
+            if (GameManager.instance.lastSelectModel != null) {
+                ModelColorComponent.UnSelect(GameManager.instance.lastSelectModel.ModelColorComponent.highlight);
+            }
+            ModelColorComponent.Select(GameManager.instance.selectModel.ModelColorComponent.highlight);
+        }
+        else {
+            ModelColorComponent.Select(GameManager.instance.selectModel.ModelColorComponent.highlight);
+        }
+        if (Type == GameManager.ModelType.CrossClear) {
+            manager.ClearCross(x,y);
+            //TODO:特效
+            Instantiate(effect_Row, new Vector3(0, 1.2f-0.65f*y, 0), Quaternion.Euler(new Vector3(0,0,90)));
+            Instantiate(effect_Col,new Vector3(-2.2f + 0.65f * x, -1.6f, 0) , Quaternion.identity);
+        }
     }
     public void OnMouseUp() {
         manager.ReleaseModel();

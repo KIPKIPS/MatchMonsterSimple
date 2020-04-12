@@ -237,6 +237,7 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\AboutUs.cs" />
     <Compile Include="Assets\Scripts\AnimateEvent.cs" />
+    <Compile Include="Assets\Scripts\DestroyEffect.cs" />
     <Compile Include="Assets\Scripts\Excellent.cs" />
     <Compile Include="Assets\Scripts\GameManager.cs" />
     <Compile Include="Assets\Scripts\GameOver.cs" />

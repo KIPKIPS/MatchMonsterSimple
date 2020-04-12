@@ -14,13 +14,13 @@ public class GameManager : MonoBehaviour {
     public int xCol;//列
     public int yRow;//行
     public GameObject gridPrefab;
-
+    public ModelBase lastSelectModel;
     public ModelBase selectModel;//鼠标点击的当前对象
     public ModelBase targetModel;//玩家目的移动对象
     //种类
     public enum ModelType {
         //空,默认,障碍物,行消除,列消除,彩虹道具
-        Empty, Normal, Wall, RowClear, ColClear, RainBow, Count//count为标记类型
+        Empty, Normal, Wall, CrossClear, RainBow, Count//count为标记类型
     }
     //通过字典查找对应类型的预制体
     public Dictionary<ModelType, GameObject> modelPrefabDict;
@@ -42,7 +42,7 @@ public class GameManager : MonoBehaviour {
     public bool canAudio;
     public Text scoreText;//score
     public Text restTimeText;//time
-    public float gameTime=60f;
+    public float gameTime = 60f;
     private bool gameover;
     public int score;
     public GameObject gameoverPanel;
@@ -51,10 +51,8 @@ public class GameManager : MonoBehaviour {
     public GameObject breakRecord;
     public Transform spawn;
     public GameObject[] excellent;
-    public float addScoreTime;
-    private float curScore;
     void Awake() {
-        PlayerPrefs.SetInt("HistoryHighestScore",0);
+        //PlayerPrefs.SetInt("HistoryHighestScore", 0);
         gameover = false;
         instance = this;
         canAudio = true;
@@ -98,7 +96,7 @@ public class GameManager : MonoBehaviour {
             return;
         }
         gameTime -= Time.deltaTime;
-        if (gameTime<=0) {
+        if (gameTime <= 0) {
             gameTime = 0;
             //TODO:失败处理
             gameover = true;
@@ -107,17 +105,7 @@ public class GameManager : MonoBehaviour {
             return;
         }
         restTimeText.text = gameTime.ToString("0");//0取整,0.0保留一位小数,0.00保留两位小数......
-        if (addScoreTime <= 0.05f) {
-            addScoreTime += Time.deltaTime;
-        }
-        else {
-            if (curScore<score) {
-                curScore+=10;
-                scoreText.text = curScore+"";
-                addScoreTime = 0;
-            }
-        }
-        
+        scoreText.text = score + "";
     }
     //计算格子的位置坐标
     public Vector3 CalGridPos(int x, int y) {
@@ -241,12 +229,16 @@ public class GameManager : MonoBehaviour {
                 models[m1.X, m1.Y].ModelMoveComponent.Undo(m1, m2, fillTime);//交换位置再还原
             }
         }
+
     }
+
+
     //选中对象
     public void SelectModel(ModelBase m) {
         if (gameover) {
             return;
         }
+        lastSelectModel = selectModel;
         selectModel = m;
     }
     //目标对象
@@ -417,21 +409,23 @@ public class GameManager : MonoBehaviour {
     public bool ClearModel(int x, int y) {
         //当前model可以清除并且没有正在清除
         if (models[x, y].CanClear() && models[x, y].ModelClearComponent.IsClearing == false) {
-            models[x, y].ModelClearComponent.Clear();//将model清除掉
-            CreatNewModel(x, y, ModelType.Empty);//原地生成一个新的空类型
-            ClearRoadblock(x,y);//清除障碍物
-            return true;
+            if (models[x, y].Type!=ModelType.CrossClear) {
+                models[x, y].ModelClearComponent.Clear();//将model清除掉
+                CreatNewModel(x, y, ModelType.Empty);//原地生成一个新的空类型
+                ClearRoadblock(x, y);//清除障碍物
+                return true;
+            }
         }
         return false;
     }
     //清除障碍物
-    public void ClearRoadblock(int x,int y) {//被消除model的坐标
-        for (int nearX = x-1; nearX <= x+1; nearX++) {
+    public void ClearRoadblock(int x, int y) {//被消除model的坐标
+        for (int nearX = x - 1; nearX <= x + 1; nearX++) {
             //若不为自身,未超出格子边界,类型为wall,可以清除
-            if (nearX != x&& nearX >= 0&& nearX < xCol) {
+            if (nearX != x && nearX >= 0 && nearX < xCol) {
                 if (models[nearX, y].CanClear() && models[nearX, y].Type == ModelType.Wall) {
                     //Debug.Log("clear");
-                    models[nearX,y].ModelClearComponent.Clear();//消除障碍物
+                    models[nearX, y].ModelClearComponent.Clear();//消除障碍物
                     CreatNewModel(nearX, y, ModelType.Empty);//原地置空等待填充
                 }
             }
@@ -444,7 +438,7 @@ public class GameManager : MonoBehaviour {
                     models[x, nearY].ModelClearComponent.Clear();//消除障碍物
                     CreatNewModel(x, nearY, ModelType.Empty);//原地置空等待填充
                 }
-                
+
             }
         }
     }
@@ -456,20 +450,34 @@ public class GameManager : MonoBehaviour {
                 if (models[x, y].CanClear()) {
                     List<ModelBase> matchList = MatchModels(models[x, y], x, y);
                     if (matchList != null) {
-                        int num = matchList.Count;
+                        ModelType specialModelType = ModelType.Count;//是否产生特殊奖励
+                        ModelBase model = matchList[0];
+                        int specialModelX = model.X;
+                        int specialModelY = model.Y;
+                        if (matchList.Count == 4) {
+                            specialModelType = ModelType.CrossClear;
+                        }
                         foreach (var m in matchList) {
                             if (ClearModel(m.X, m.Y)) {
                                 needFill = true;
                             }
                         }
-                        //消除个数处理分数
+                        if (specialModelType != ModelType.Count) {
+                            Destroy(models[specialModelX,specialModelY].gameObject);
+                            ModelBase newModel = CreatNewModel(specialModelX, specialModelY, specialModelType);
+                            models[specialModelX, specialModelY] = newModel;
+                        }
+                        //根据消除个数处理分数
+                        int num = matchList.Count;
                         switch (num) {
-                            case 3: score += 10;
+                            case 3:
+                                score += 10;
                                 break;
                             case 4:
                                 Excellent(0);
-                                score += 20;break;
-                            case 5: score += 30;
+                                score += 20; break;
+                            case 5:
+                                score += 30;
                                 Excellent(1);
                                 break;
                             case 6: score += 60; break;
@@ -484,6 +492,21 @@ public class GameManager : MonoBehaviour {
         return needFill;
     }
 
+    public void ClearCross(int x, int y) {
+        Debug.Log("cross");
+        for (int i = 0; i < xCol; i++) {
+            ClearModel(i, y);
+        }
+        for (int j = 0; j < yRow; j++) {
+            if (j!=y) {
+                ClearModel(x, j);
+            }
+        }
+        score += 200;
+        models[x, y].ModelClearComponent.Clear();
+        models[x, y] = CreatNewModel(x, y, ModelType.Empty);
+        StartCoroutine(FillAll());
+    }
     //处理UI界面的事件
     public void Excellent(int index) {
         Instantiate(excellent[index], spawn);
@@ -492,7 +515,7 @@ public class GameManager : MonoBehaviour {
         pausePanel.SetActive(true);
         pausePanel.GetComponent<Animator>().SetTrigger("open");
         if (canAudio) {
-            AudioSource.PlayClipAtPoint(audios[0],Camera.main.transform.position,1);
+            AudioSource.PlayClipAtPoint(audios[0], Camera.main.transform.position, 1);
         }
     }
 
@@ -500,7 +523,7 @@ public class GameManager : MonoBehaviour {
         Time.timeScale = 1;
         pausePanel.GetComponent<Animator>().SetTrigger("close");
         if (canAudio) {
-            AudioSource.PlayClipAtPoint(audios[1], Camera.main.transform.position,1);
+            AudioSource.PlayClipAtPoint(audios[1], Camera.main.transform.position, 1);
         }
     }
 
@@ -544,8 +567,8 @@ public class GameManager : MonoBehaviour {
     }
 
     public void GameOver() {
-        if (score>PlayerPrefs.GetInt("HistoryHighestScore",0)) {
-            PlayerPrefs.SetInt("HistoryHighestScore",score);
+        if (score > PlayerPrefs.GetInt("HistoryHighestScore", 0)) {
+            PlayerPrefs.SetInt("HistoryHighestScore", score);
             breakRecord.SetActive(true);
         }
         gameoverPanel.GetComponent<Animator>().SetTrigger("display");
