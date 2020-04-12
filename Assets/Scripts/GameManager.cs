@@ -54,6 +54,7 @@ public class GameManager : MonoBehaviour {
     public float addScoreTime;
     private float curScore;
     void Awake() {
+        PlayerPrefs.SetInt("HistoryHighestScore",0);
         gameover = false;
         instance = this;
         canAudio = true;
@@ -412,17 +413,42 @@ public class GameManager : MonoBehaviour {
         }
         return null;
     }
-
+    //清除model
     public bool ClearModel(int x, int y) {
         //当前model可以清除并且没有正在清除
         if (models[x, y].CanClear() && models[x, y].ModelClearComponent.IsClearing == false) {
             models[x, y].ModelClearComponent.Clear();//将model清除掉
             CreatNewModel(x, y, ModelType.Empty);//原地生成一个新的空类型
+            ClearRoadblock(x,y);//清除障碍物
             return true;
         }
         return false;
     }
-    //清除匹配的model
+    //清除障碍物
+    public void ClearRoadblock(int x,int y) {//被消除model的坐标
+        for (int nearX = x-1; nearX <= x+1; nearX++) {
+            //若不为自身,未超出格子边界,类型为wall,可以清除
+            if (nearX != x&& nearX >= 0&& nearX < xCol) {
+                if (models[nearX, y].CanClear() && models[nearX, y].Type == ModelType.Wall) {
+                    //Debug.Log("clear");
+                    models[nearX,y].ModelClearComponent.Clear();//消除障碍物
+                    CreatNewModel(nearX, y, ModelType.Empty);//原地置空等待填充
+                }
+            }
+        }
+        for (int nearY = y - 1; nearY <= y + 1; nearY++) {
+            //若不为自身,未超出格子边界,类型为wall,可以清除
+            if (nearY != y && nearY >= 0 && nearY < yRow) {
+                if (models[x, nearY].CanClear() && models[x, nearY].Type == ModelType.Wall) {
+                    //Debug.Log("clear");
+                    models[x, nearY].ModelClearComponent.Clear();//消除障碍物
+                    CreatNewModel(x, nearY, ModelType.Empty);//原地置空等待填充
+                }
+                
+            }
+        }
+    }
+    //清除匹配的model列表
     public bool ClearAllMatchModels() {
         bool needFill = false;
         for (int y = 0; y < yRow; y++) {

@@ -20,6 +20,9 @@ GameObject:
   m_Component:
   - component: {fileID: 4250667141313918}
   - component: {fileID: 114605368534534916}
+  - component: {fileID: 114089513116507240}
+  - component: {fileID: 114801250231054040}
+  - component: {fileID: 114548717271044022}
   m_Layer: 0
   m_Name: Wall
   m_TagString: Untagged
@@ -63,13 +66,40 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1480310299454214}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: -5.04, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4021090143776548}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &114089513116507240
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1480310299454214}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b2fd295020b473446bd177b2efc35bc1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  destoryAnim: {fileID: 0}
+  modelBase: {fileID: 0}
+  destoryNormalAudio: {fileID: 0}
+--- !u!114 &114548717271044022
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1480310299454214}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5dc85ab436b6dcd4986e2d408c15dc7c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  modelBase: {fileID: 0}
+  isPlaying: 0
 --- !u!114 &114605368534534916
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -82,6 +112,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   manager: {fileID: 0}
+--- !u!114 &114801250231054040
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1480310299454214}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 87a7f5b1c27a1864294fa4b17f65adc7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  colorSprites: []
+  sprite: {fileID: 0}
+  anim: {fileID: 0}
 --- !u!212 &212943183704925130
 SpriteRenderer:
   m_ObjectHideFlags: 1
