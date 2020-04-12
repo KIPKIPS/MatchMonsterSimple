@@ -1,15 +1,24 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 
 public class UIManager : MonoBehaviour {
+    public static UIManager instance {
+        get { return _instance; }
+    }
+    private static UIManager _instance;
     public GameObject settingPanel;
     public GameObject aboutUsPanel;
     public GameObject audioOff;
     public AudioClip[] audios;
     public bool canAudio;
+    public Animator[] anims;
+    public MapController curMap;
     void Awake() {
+        _instance = this;
         canAudio = PlayerPrefs.GetInt("Audio",1) == 1;
         if (canAudio) {
             Camera.main.GetComponent<AudioSource>().Play();
@@ -26,6 +35,21 @@ public class UIManager : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
         canAudio = PlayerPrefs.GetInt("Audio") == 1;
+    }
+    //更换地图
+    public void MapChange() {
+        EventSystem.current.currentSelectedGameObject.GetComponent<Animator>().SetTrigger("select");
+        curMap = EventSystem.current.currentSelectedGameObject.GetComponent<MapController>();
+        for (int i = 0; i < 3&&i!= curMap.Index; i++) {
+            anims[i].SetTrigger("hide");
+        }
+    }
+
+    public void MapClose() {
+        anims[curMap.Index].SetTrigger("close");
+        for (int i = 0; i < 3 && i != curMap.Index; i++) {
+            anims[i].SetTrigger("show");
+        }
     }
 
     public void StartGame() {
