@@ -239,6 +239,7 @@
     <Compile Include="Assets\Scripts\Game\AnimateEvent.cs" />
     <Compile Include="Assets\Scripts\Game\DestroyEffect.cs" />
     <Compile Include="Assets\Scripts\Game\Excellent.cs" />
+    <Compile Include="Assets\Scripts\Game\GameBegin.cs" />
     <Compile Include="Assets\Scripts\Game\GameManager.cs" />
     <Compile Include="Assets\Scripts\Game\GameOver.cs" />
     <Compile Include="Assets\Scripts\Game\ModelBase.cs" />
@@ -246,6 +247,7 @@
     <Compile Include="Assets\Scripts\Game\ModelColor.cs" />
     <Compile Include="Assets\Scripts\Game\ModelColorClearByType.cs" />
     <Compile Include="Assets\Scripts\Game\ModelMove.cs" />
+    <Compile Include="Assets\Scripts\Start\MapAnimateEvent.cs" />
     <Compile Include="Assets\Scripts\Start\MapController.cs" />
     <Compile Include="Assets\Scripts\Start\UIManager.cs" />
   </ItemGroup>

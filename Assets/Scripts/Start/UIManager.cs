@@ -3,7 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.Experimental.UIElements;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour {
     public static UIManager instance {
@@ -17,6 +19,8 @@ public class UIManager : MonoBehaviour {
     public bool canAudio;
     public Animator[] anims;
     public MapController curMap;
+
+    public GameObject mapPanel;
     void Awake() {
         _instance = this;
         canAudio = PlayerPrefs.GetInt("Audio",1) == 1;
@@ -38,35 +42,70 @@ public class UIManager : MonoBehaviour {
     }
     //更换地图
     public void MapChange() {
-        EventSystem.current.currentSelectedGameObject.GetComponent<Animator>().SetTrigger("select");
+        if (canAudio) {
+            AudioSource.PlayClipAtPoint(audios[0], Camera.main.transform.position, 0.5f);
+            AudioSource.PlayClipAtPoint(audios[1], Camera.main.transform.position, 1);
+        }
+        //EventSystem.current.currentSelectedGameObject.GetComponent<Animator>().SetTrigger("select");
         curMap = EventSystem.current.currentSelectedGameObject.GetComponent<MapController>();
-        for (int i = 0; i < 3&&i!= curMap.Index; i++) {
-            anims[i].SetTrigger("hide");
+        Debug.Log(curMap.Index);
+        for (int i = 0; i < 3; i++) {
+            if ( i != curMap.Index) {
+                anims[i].SetTrigger("hide");
+            }
+            else {
+                anims[i].transform.GetComponent<UnityEngine.UI.Button>().enabled = false;
+                anims[i].SetTrigger("select");
+            }
         }
     }
 
     public void MapClose() {
-        anims[curMap.Index].SetTrigger("close");
-        for (int i = 0; i < 3 && i != curMap.Index; i++) {
-            anims[i].SetTrigger("show");
+        if (canAudio) {
+            AudioSource.PlayClipAtPoint(audios[0], Camera.main.transform.position, 0.5f);
+            AudioSource.PlayClipAtPoint(audios[2], Camera.main.transform.position, 1);
+        }
+        for (int i = 0; i < 3; i++) {
+            if ( i != curMap.Index) {
+                anims[i].SetTrigger("show");
+                anims[i].transform.GetComponent<UnityEngine.UI.Button>().enabled = true;
+            }
+            else {
+                anims[i].transform.GetComponent<UnityEngine.UI.Button>().enabled = true;
+                anims[i].SetTrigger("close");
+            }
         }
     }
 
     public void StartGame() {
-        
+        if (canAudio) {
+            AudioSource.PlayClipAtPoint(audios[0], Camera.main.transform.position, 0.5f);
+            AudioSource.PlayClipAtPoint(audios[1], Camera.main.transform.position, 1);
+        }
+        mapPanel.GetComponent<Animator>().SetTrigger("tomap");
+        for (int i = 0; i < 3; i++) {
+            if (curMap!=null) {
+                if (i != curMap.Index) {
+                    anims[i].SetTrigger("show");
+                    anims[i].transform.GetComponent<UnityEngine.UI.Button>().enabled = true;
+                }
+                else {
+                    anims[i].transform.GetComponent<UnityEngine.UI.Button>().enabled = true;
+                    anims[i].SetTrigger("close");
+                }
+            }
+        }
     }
 
     public void Setting() {
         settingPanel.SetActive(true);
         if (canAudio) {
             audioOff.SetActive(false);
+            AudioSource.PlayClipAtPoint(audios[0], Camera.main.transform.position, 0.5f);
+            AudioSource.PlayClipAtPoint(audios[1], Camera.main.transform.position, 1);
         }
         else {
             audioOff.SetActive(true);
-        }
-        if (canAudio) {
-            AudioSource.PlayClipAtPoint(audios[0], Camera.main.transform.position, 0.5f);
-            AudioSource.PlayClipAtPoint(audios[1], Camera.main.transform.position, 1);
         }
         settingPanel.GetComponent<Animator>().SetTrigger("open");
     }
@@ -112,5 +151,18 @@ public class UIManager : MonoBehaviour {
             PlayerPrefs.SetInt("Audio", 1);
             Camera.main.GetComponent<AudioSource>().Play();
         }
+    }
+
+    public void BackToMenu() {
+        if (canAudio) {
+            AudioSource.PlayClipAtPoint(audios[0], Camera.main.transform.position, 0.5f);
+            AudioSource.PlayClipAtPoint(audios[2], Camera.main.transform.position, 1);
+        }
+        mapPanel.GetComponent<Animator>().SetTrigger("tomenu");
+    }
+
+    public void SelectLevel() {
+        Debug.Log(EventSystem.current.currentSelectedGameObject.name);
+        SceneManager.LoadScene(1);
     }
 }

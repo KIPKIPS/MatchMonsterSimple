@@ -51,11 +51,14 @@ public class GameManager : MonoBehaviour {
     public GameObject breakRecord;
     public Transform spawn;
     public GameObject[] excellent;
+    public GameObject beginPanel;
+
+    private float time = 0;
     void Awake() {
         //PlayerPrefs.SetInt("HistoryHighestScore", 0);
         gameover = false;
         instance = this;
-        canAudio = PlayerPrefs.GetInt("Audio", 1)==1;
+        canAudio = PlayerPrefs.GetInt("Audio", 1) == 1;
         if (canAudio) {
             audioOnOff.SetActive(false);
             Camera.main.GetComponent<AudioSource>().Play();
@@ -64,6 +67,7 @@ public class GameManager : MonoBehaviour {
             audioOnOff.SetActive(true);
             Camera.main.GetComponent<AudioSource>().Stop();
         }
+        beginPanel.SetActive(true);
     }
     void Start() {
         models = new ModelBase[xCol, yRow];
@@ -97,6 +101,10 @@ public class GameManager : MonoBehaviour {
         if (gameover) {
             return;
         }
+
+        time += Time.deltaTime;
+        time %= 10;
+        //Debug.Log(time);
         gameTime -= Time.deltaTime;
         if (gameTime <= 0) {
             gameTime = 0;
@@ -120,7 +128,7 @@ public class GameManager : MonoBehaviour {
         models[x, y] = newModel.GetComponent<ModelBase>();
         models[x, y].Init(x, y, this, type);
         return models[x, y];
-        
+
     }
     //全部填充
     public IEnumerator FillAll() {
@@ -215,25 +223,26 @@ public class GameManager : MonoBehaviour {
         if (m1.CanMove() && m2.CanMove()) {
             models[m1.X, m1.Y] = m2;
             models[m2.X, m2.Y] = m1;
-            if (MatchModels(m2, m1.X, m1.Y) != null || MatchModels(m1, m2.X, m2.Y) != null||m1.Type==ModelType.RainBow||m2.Type==ModelType.RainBow) {
+            if (MatchModels(m2, m1.X, m1.Y) != null || MatchModels(m1, m2.X, m2.Y) != null || m1.Type == ModelType.RainBow || m2.Type == ModelType.RainBow) {
                 int tempX = m1.X;
                 int tempY = m1.Y;
                 m1.ModelMoveComponent.Move(m2.X, m2.Y, fillTime);//交换
                 m2.ModelMoveComponent.Move(tempX, tempY, fillTime);
-                if (m1.Type==ModelType.RainBow&&m1.CanClear()&&m2.CanClear()) {
+                if (m1.Type == ModelType.RainBow && m1.CanClear() && m2.CanClear()) {
                     ModelColorClearByType mcct = m1.transform.GetComponent<ModelColorClearByType>();
                     Debug.Log(mcct == null);
-                    if (mcct!=null) {
+                    if (mcct != null) {
                         mcct.Color = m2.ModelColorComponent.Color;
                         ClearByType(mcct.Color);
                     }
                     m1.ModelClearComponent.Clear();
-                    models[m1.X,m1.Y] = CreatNewModel(m1.X, m1.Y, ModelType.Empty);
+                    models[m1.X, m1.Y] = CreatNewModel(m1.X, m1.Y, ModelType.Empty);
                     ClearModel(m1.X, m1.Y);
+                    StartCoroutine(FillAll());//将消除后的空位进行填充
                 }
                 if (m2.Type == ModelType.RainBow && m2.CanClear() && m1.CanClear()) {
                     ModelColorClearByType mcct = m2.transform.GetComponent<ModelColorClearByType>();
-                    Debug.Log(mcct==null);
+                    Debug.Log(mcct == null);
                     if (mcct != null) {
                         mcct.Color = m1.ModelColorComponent.Color;
                         ClearByType(mcct.Color);
@@ -241,6 +250,7 @@ public class GameManager : MonoBehaviour {
                     m2.ModelClearComponent.Clear();
                     models[m2.X, m2.Y] = CreatNewModel(m2.X, m2.Y, ModelType.Empty);
                     ClearModel(m2.X, m2.Y);
+                    StartCoroutine(FillAll());//将消除后的空位进行填充
                 }
                 ClearAllMatchModels();//清除所有匹配的model
                 StartCoroutine(FillAll());//将消除后的空位进行填充
@@ -250,11 +260,9 @@ public class GameManager : MonoBehaviour {
                 models[m1.X, m1.Y] = m1;
                 models[m2.X, m2.Y] = m2;
                 models[m1.X, m1.Y].ModelMoveComponent.Undo(m1, m2, fillTime);//交换位置再还原
-
             }
-
         }
-
+        StartCoroutine(FillAll());//将消除后的空位进行填充
     }
     //选中对象
     public void SelectModel(ModelBase m) {
@@ -279,6 +287,7 @@ public class GameManager : MonoBehaviour {
         if (IsNeighbor(selectModel, targetModel)) {
             ExchangeModel(selectModel, targetModel);
         }
+        StartCoroutine(FillAll());//将消除后的空位进行填充
     }
     //匹配model
     public List<ModelBase> MatchModels(ModelBase model, int newX, int newY) {
@@ -432,7 +441,7 @@ public class GameManager : MonoBehaviour {
     public bool ClearModel(int x, int y) {
         //当前model可以清除并且没有正在清除
         if (models[x, y].CanClear() && models[x, y].ModelClearComponent.IsClearing == false) {
-            if (models[x, y].Type!=ModelType.CrossClear&& models[x, y].Type!=ModelType.RainBow) {
+            if (models[x, y].Type != ModelType.CrossClear && models[x, y].Type != ModelType.RainBow) {
                 models[x, y].ModelClearComponent.Clear();//将model清除掉
                 CreatNewModel(x, y, ModelType.Empty);//原地生成一个新的空类型
                 ClearRoadblock(x, y);//清除障碍物
@@ -478,10 +487,11 @@ public class GameManager : MonoBehaviour {
                         ModelBase model = matchList[0];
                         int specialModelX = model.X;
                         int specialModelY = model.Y;
-                        if (num>=4&&num%2==0&&Random.Range(0,3)==2) {
+
+                        if (num >= 3 && Random.Range(0,2)==0) {
                             specialModelType = ModelType.CrossClear;
                         }
-                        else if (num >= 4 && num %2==1 &&Random.Range(0, 3) == 2) {
+                        else {
                             //Debug.Log(matchList.Count);
                             specialModelType = ModelType.RainBow;
                         }
@@ -490,11 +500,12 @@ public class GameManager : MonoBehaviour {
                                 needFill = true;
                             }
                         }
-                        if (specialModelType != ModelType.Count) {
-                            Destroy(models[specialModelX,specialModelY].gameObject);
-                            ModelBase newModel = CreatNewModel(specialModelX, specialModelY, specialModelType);
+                        if (specialModelType != ModelType.Count && (time >=0f&&time<0.2f) || (time >= 2f && time < 2.2f) || (time >= 4f&& time < 4.2f)|| (time >= 6f && time < 6.2f) || (time >= 8f && time < 8.2f)) {
+                            Destroy(models[specialModelX, specialModelY].gameObject);
+                            specialModelType = Random.Range(0, 2) == 1 ? ModelType.CrossClear : ModelType.RainBow;
+                            ModelBase newModel = CreatNewModel(specialModelX, specialModelY,specialModelType );
                             //十字消除
-                            if (specialModelType == ModelType.CrossClear&& newModel.CanColor() && matchList[0].CanColor()) {
+                            if (specialModelType == ModelType.CrossClear && newModel.CanColor() && matchList[0].CanColor()) {
                                 newModel.ModelColorComponent.SetColor(ModelColor.ColorType.Cross);
                             }
                             //类型消除的产生
@@ -549,7 +560,7 @@ public class GameManager : MonoBehaviour {
             ClearModel(i, y);
         }
         for (int j = 0; j < yRow; j++) {
-            if (j!=y) {
+            if (j != y) {
                 ClearModel(x, j);
             }
         }
@@ -581,7 +592,7 @@ public class GameManager : MonoBehaviour {
     public void Replay() {
         Time.timeScale = 1;
         gameoverPanel.GetComponent<Animator>().SetTrigger("close");
-        SceneManager.LoadScene(2);
+        SceneManager.LoadScene(1);
     }
     public void Quit() {
         Time.timeScale = 1;
