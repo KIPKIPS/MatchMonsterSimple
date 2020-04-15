@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class ModelBase : MonoBehaviour {
-    private int x;
+    public int x;
+    public int HP;
     public int X {
         get { return x; }
         set {
@@ -12,7 +13,7 @@ public class ModelBase : MonoBehaviour {
             }
         }
     }
-    private int y;
+    public int y;
     public int Y {
         get { return y; }
         set {
@@ -21,27 +22,28 @@ public class ModelBase : MonoBehaviour {
             }
         }
     }
-    private GameManager.ModelType type;
+    public GameManager.ModelType type;
     public GameManager.ModelType Type {
         get { return type; }
         set { type = value; }
     }
     public GameManager manager;
-    private ModelMove modelMoveComponent;
+    public ModelMove modelMoveComponent;
     public ModelMove ModelMoveComponent {
         get { return modelMoveComponent; }
     }
-    private ModelColor modelColorComponent;
+    public ModelColor modelColorComponent;
     public GameObject effect_Row;
     public GameObject effect_Col;
     public ModelColor ModelColorComponent {
         get { return modelColorComponent; }
     }
-    private ModelClear modelClearComponent;
+    public ModelClear modelClearComponent;
     public ModelClear ModelClearComponent {
         get { return modelClearComponent; }
     }
     void Awake() {
+        HP = 3;
         modelClearComponent = GetComponent<ModelClear>();
         modelMoveComponent = GetComponent<ModelMove>();
         modelColorComponent = GetComponent<ModelColor>();
@@ -56,7 +58,13 @@ public class ModelBase : MonoBehaviour {
         return modelColorComponent != null;
     }
     void Start() {
+        if (this.Type==GameManager.ModelType.Empty) {
+            Invoke("Destroy",6f);
+        }
+    }
 
+    void Destroy() {
+        Destroy(this.gameObject);
     }
 
     void Update() {
@@ -82,7 +90,9 @@ public class ModelBase : MonoBehaviour {
             ModelColorComponent.Select(GameManager.instance.selectModel.ModelColorComponent.highlight);
         }
         else {
-            ModelColorComponent.Select(GameManager.instance.selectModel.ModelColorComponent.highlight);
+            if (GameManager.instance.selectModel!=null&& GameManager.instance.selectModel.CanColor()) {
+                ModelColorComponent.Select(GameManager.instance.selectModel.ModelColorComponent.highlight);
+            }
         }
         if (Type == GameManager.ModelType.CrossClear) {
             manager.ClearCross(x,y);

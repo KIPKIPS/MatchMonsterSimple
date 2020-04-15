@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class ModelClear : MonoBehaviour {
     public AnimationClip destoryAnim;
-    private bool isClearing;//当前model是否正在被清除
+    public bool isClearing;//当前model是否正在被清除
     public bool IsClearing {
         get { return isClearing; }
     }
@@ -12,9 +12,6 @@ public class ModelClear : MonoBehaviour {
     public AudioClip destoryNormalAudio;
     Animator animator;
     public virtual void Clear() {
-        if (GetComponent<ModelBase>().Type==GameManager.ModelType.CrossClear) {
-            Debug.Log("x");
-        }
         isClearing = true;
         StartCoroutine(ClearCoroutine());
     }
@@ -25,7 +22,7 @@ public class ModelClear : MonoBehaviour {
             animator.SetTrigger("clear");
             //animator.Play(destoryAnim.name);//播放清除动画
             //TODO:音效
-            if (GameManager.instance.canAudio) {
+            if (GameManager.instance.canAudio&&GameManager.instance.gameBegin) {
                 AudioSource.PlayClipAtPoint(destoryNormalAudio,this.transform.position);
             }
             yield return new WaitForSeconds(destoryAnim.length);//等待清除动画播放的时间

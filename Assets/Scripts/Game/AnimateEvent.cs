@@ -13,7 +13,7 @@ public class AnimateEvent : MonoBehaviour {
 	void Update () {
 		
 	}
-
+    //结束时将自身设为不可见
     public void CloseAnimateEnd() {
         this.gameObject.SetActive(false);
     }

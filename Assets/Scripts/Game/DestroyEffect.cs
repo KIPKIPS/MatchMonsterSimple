@@ -13,7 +13,7 @@ public class DestroyEffect : MonoBehaviour {
 	void Update () {
 		
 	}
-
+    //消除特效
     public void Destroy() {
         Destroy(this.gameObject);
     }

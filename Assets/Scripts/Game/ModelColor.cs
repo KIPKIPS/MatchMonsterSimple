@@ -8,7 +8,7 @@ public class ModelColor : MonoBehaviour {
         Blue, Green, Red, Purple,Cross, Rainbow, Count
     }
 
-    private ColorType color;
+    public ColorType color;
     public ColorType Color {
         get { return color; }
         set { SetColor(value); }

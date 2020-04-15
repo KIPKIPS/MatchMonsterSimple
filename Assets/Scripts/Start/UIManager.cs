@@ -21,6 +21,17 @@ public class UIManager : MonoBehaviour {
     public MapController curMap;
 
     public GameObject mapPanel;
+    public GameObject achievementPanel;
+
+    public GameObject crossLock;
+    public GameObject rainbowLock;
+    public GameObject timeAddLock;
+    public GameObject monsterKillerLock;
+    public GameObject playTimeLock;
+    public GameObject totalScoreLock;
+    public GameObject luckDogLock;
+    public GameObject wallBreakLock;
+    
     void Awake() {
         _instance = this;
         canAudio = PlayerPrefs.GetInt("Audio",1) == 1;
@@ -38,7 +49,7 @@ public class UIManager : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        canAudio = PlayerPrefs.GetInt("Audio") == 1;
+        canAudio = PlayerPrefs.GetInt("Audio",1) == 1;
     }
     //更换地图
     public void MapChange() {
@@ -76,29 +87,21 @@ public class UIManager : MonoBehaviour {
             }
         }
     }
-
+    public void QuitGame() {
+        Application.Quit();
+    }
     public void StartGame() {
         if (canAudio) {
             AudioSource.PlayClipAtPoint(audios[0], Camera.main.transform.position, 0.5f);
             AudioSource.PlayClipAtPoint(audios[1], Camera.main.transform.position, 1);
         }
         mapPanel.GetComponent<Animator>().SetTrigger("tomap");
-        for (int i = 0; i < 3; i++) {
-            if (curMap!=null) {
-                if (i != curMap.Index) {
-                    anims[i].SetTrigger("show");
-                    anims[i].transform.GetComponent<UnityEngine.UI.Button>().enabled = true;
-                }
-                else {
-                    anims[i].transform.GetComponent<UnityEngine.UI.Button>().enabled = true;
-                    anims[i].SetTrigger("close");
-                }
-            }
-        }
+        
     }
 
     public void Setting() {
         settingPanel.SetActive(true);
+        Debug.Log(canAudio+" "+PlayerPrefs.GetInt("CanAudio"));
         if (canAudio) {
             audioOff.SetActive(false);
             AudioSource.PlayClipAtPoint(audios[0], Camera.main.transform.position, 0.5f);
@@ -115,7 +118,6 @@ public class UIManager : MonoBehaviour {
             AudioSource.PlayClipAtPoint(audios[0], Camera.main.transform.position, 0.5f);
             AudioSource.PlayClipAtPoint(audios[2], Camera.main.transform.position, 1);
         }
-        
         settingPanel.GetComponent<Animator>().SetTrigger("close");
     }
 
@@ -158,11 +160,72 @@ public class UIManager : MonoBehaviour {
             AudioSource.PlayClipAtPoint(audios[0], Camera.main.transform.position, 0.5f);
             AudioSource.PlayClipAtPoint(audios[2], Camera.main.transform.position, 1);
         }
+
+        if (curMap!=null) {
+            for (int i = 0; i < 3; i++) {
+                if (i != curMap.Index) {
+                    anims[i].SetTrigger("show");
+                    anims[i].transform.GetComponent<UnityEngine.UI.Button>().enabled = true;
+                }
+                else {
+                    anims[i].transform.GetComponent<UnityEngine.UI.Button>().enabled = true;
+                    anims[i].SetTrigger("close");
+                }
+            }
+        }
+        
         mapPanel.GetComponent<Animator>().SetTrigger("tomenu");
     }
 
     public void SelectLevel() {
-        Debug.Log(EventSystem.current.currentSelectedGameObject.name);
+        PlayerPrefs.SetInt("PlayTimes", PlayerPrefs.GetInt("PlayTimes", 0) + 1);//记录游玩次数
+        //Debug.Log(EventSystem.current.currentSelectedGameObject.name);
         SceneManager.LoadScene(1);
+    }
+
+    public void ClearHistoryScore() {
+        if (canAudio) {
+            AudioSource.PlayClipAtPoint(audios[0], Camera.main.transform.position, 0.5f);
+        }
+        PlayerPrefs.DeleteAll();
+        audioOff.SetActive(false);
+        Camera.main.GetComponent<AudioSource>().Play();
+    }
+
+    public Text playTimeNumsText;
+    public Text clearModelNumsText;
+    public Text totalScoreText;
+    //public Text 
+
+    //成就界面的展示
+    public void AchievementOpen() {
+        if (canAudio) {
+            AudioSource.PlayClipAtPoint(audios[0], Camera.main.transform.position, 0.5f);
+            AudioSource.PlayClipAtPoint(audios[1], Camera.main.transform.position, 1);
+        }
+        //成就数据读取
+        playTimeNumsText.text = PlayerPrefs.GetInt("PlayTimes", 0) + "";
+        clearModelNumsText.text = PlayerPrefs.GetInt("ClearModelNums", 0) + "";
+        totalScoreText.text = PlayerPrefs.GetInt("TotalScore", 0) + "";
+        Debug.Log(PlayerPrefs.GetInt("TotalScore", 0));
+        
+        crossLock.SetActive(PlayerPrefs.GetInt("CrossNums", 0) < 1);
+        rainbowLock.SetActive(PlayerPrefs.GetInt("RainbowNums", 0) < 1);
+        timeAddLock.SetActive(PlayerPrefs.GetInt("TimeAddNums", 0) < 1);
+        monsterKillerLock.SetActive(PlayerPrefs.GetInt("ClearModelNums", 0) <1);
+        playTimeLock.SetActive(PlayerPrefs.GetInt("PlayTimes", 0) < 2);
+        totalScoreLock.SetActive(PlayerPrefs.GetInt("TotalScore", 0) < 20);
+        luckDogLock.SetActive(PlayerPrefs.GetInt("LuckDog", 0) < 1);
+        wallBreakLock.SetActive(PlayerPrefs.GetInt("WallNums", 0) < 1);
+        //
+        achievementPanel.SetActive(true);
+        achievementPanel.GetComponent<Animator>().SetTrigger("open");
+    }
+    public void AchievementClose() {
+        if (canAudio) {
+            AudioSource.PlayClipAtPoint(audios[0], Camera.main.transform.position, 0.5f);
+            AudioSource.PlayClipAtPoint(audios[2], Camera.main.transform.position, 1);
+        }
+        achievementPanel.GetComponent<Animator>().SetTrigger("close");
     }
 }

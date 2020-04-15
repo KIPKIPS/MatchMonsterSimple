@@ -28,16 +28,23 @@ public class ModelMove : MonoBehaviour {
     }
 
     private IEnumerator MoveCoroutine(int newX, int newY, float time) {
-        modelBase.X = newX;
-        modelBase.Y = newY;
-        //每一帧都去移动
-        Vector3 startPos = transform.position;
-        Vector3 endPos = modelBase.manager.CalGridPos(newX, newY);
-        for (float t = 0; t < time; t += Time.deltaTime) {
-            modelBase.transform.position = Vector3.Lerp(startPos, endPos, t / time);
-            yield return 0;
+        if (modelBase != null) {
+            modelBase.X = newX;
+            modelBase.Y = newY;
+            //每一帧都去移动
+            Vector3 startPos = transform.position;
+            Vector3 endPos = modelBase.manager.CalGridPos(newX, newY);
+            for (float t = 0; t < time; t += Time.deltaTime) {
+                if (modelBase!=null) {
+                    modelBase.transform.position = Vector3.Lerp(startPos, endPos, t / time);
+                    yield return 0;
+                }
+            }
+
+            if (modelBase!=null) {
+                modelBase.transform.position = endPos;
+            }
         }
-        modelBase.transform.position = endPos;
     }
 
     //无法消除的model还原方法

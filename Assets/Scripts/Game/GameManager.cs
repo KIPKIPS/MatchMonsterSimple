@@ -43,7 +43,7 @@ public class GameManager : MonoBehaviour {
     public Text scoreText;//score
     public Text restTimeText;//time
     public float gameTime = 60f;
-    private bool gameover;
+    public bool gameover;
     public int score;
     public GameObject gameoverPanel;
     public Text overScoreText;
@@ -52,10 +52,17 @@ public class GameManager : MonoBehaviour {
     public Transform spawn;
     public GameObject[] excellent;
     public GameObject beginPanel;
+    public float time = 0;
+    public bool gameBegin;
+    private int scoreStep;
 
-    private float time = 0;
+    public Transform canvas;
+    public GameObject timeAddEffetc;
+    public int awardNums;
     void Awake() {
-        //PlayerPrefs.SetInt("HistoryHighestScore", 0);
+        //Destroy(this);
+        awardNums = 0;
+        gameBegin = false;
         gameover = false;
         instance = this;
         canAudio = PlayerPrefs.GetInt("Audio", 1) == 1;
@@ -92,20 +99,16 @@ public class GameManager : MonoBehaviour {
                 CreatNewModel(x, y, ModelType.Empty);
             }
         }
-        Destroy(models[4, 4].gameObject);
-        CreatNewModel(4, 4, ModelType.Wall);
-        StartCoroutine(FillAll());
+
     }
 
     void Update() {
         if (gameover) {
             return;
         }
-
         time += Time.deltaTime;
         time %= 10;
         //Debug.Log(time);
-        gameTime -= Time.deltaTime;
         if (gameTime <= 0) {
             gameTime = 0;
             //TODO:失败处理
@@ -114,8 +117,14 @@ public class GameManager : MonoBehaviour {
             GameOver();
             return;
         }
-        restTimeText.text = gameTime.ToString("0");//0取整,0.0保留一位小数,0.00保留两位小数......
-        scoreText.text = score + "";
+        if (gameBegin) {
+            gameTime -= Time.deltaTime;
+            restTimeText.text = gameTime.ToString("0");//0取整,0.0保留一位小数,0.00保留两位小数......
+            scoreText.text = score + "";
+        }
+        else {
+            score = 0;
+        }
     }
     //计算格子的位置坐标
     public Vector3 CalGridPos(int x, int y) {
@@ -128,22 +137,21 @@ public class GameManager : MonoBehaviour {
         models[x, y] = newModel.GetComponent<ModelBase>();
         models[x, y].Init(x, y, this, type);
         return models[x, y];
-
     }
     //全部填充
-    public IEnumerator FillAll() {
+    public IEnumerator FillAll(float t) {
         bool needFill = true;
         while (needFill) {
-            yield return new WaitForSeconds(fillTime);
-            while (Fill()) {
-                yield return new WaitForSeconds(fillTime);
+            yield return new WaitForSeconds(t);
+            while (Fill(t)) {
+                yield return new WaitForSeconds(t);
             }
             //清除匹配的model
             needFill = ClearAllMatchModels();
         }
     }
     //分布填充
-    public bool Fill() {
+    public bool Fill(float t) {
         bool notFinished = false;//本次填充是否完成
         for (int y = yRow - 2; y >= 0; y--) {
             for (int x = 0; x < xCol; x++) {
@@ -152,19 +160,29 @@ public class GameManager : MonoBehaviour {
                 if (model.CanMove()) {
                     ModelBase modelBelow = models[x, y + 1];//正下方model组件
                     if (modelBelow.Type == ModelType.Empty) {//垂直填充
-                        Destroy(modelBelow.gameObject);
-                        model.ModelMoveComponent.Move(x, y + 1, fillTime);//向下移动
-                        models[x, y + 1] = model;//正下方的组件指向当前组件
-                        CreatNewModel(x, y, ModelType.Empty);//当前元素置空
-                        notFinished = true;
+                        if (modelBelow.gameObject != null) {
+                            Destroy(modelBelow.gameObject);
+                            model.ModelMoveComponent.Move(x, y + 1, t);//向下移动
+                            models[x, y + 1] = model;//正下方的组件指向当前组件
+                            if (Random.Range(0,100)==1) {
+                                CreatNewModel(x, y, ModelType.Wall);//设置障碍物
+                            }
+                            else {
+                                CreatNewModel(x, y, ModelType.Empty);//当前元素置空
+                            }
+                            notFinished = true;
+                        }
+                        else {
+                            CreatNewModel(x, y + 1, ModelType.Empty);//生成一个空物体
+                        }
                     }
                     //斜向填充,用于解决存在障碍物的情况
                     else {
-                        for (int down = -1; down <= 1; down++) {
+                        for (int down = -8; down <= 8; down++) {
                             if (down != 0) {
                                 int downX = x + down;
                                 if (downX >= 0 && downX < xCol) {//排除最右侧
-                                    ModelBase downModel = models[downX, y + 1];
+                                    ModelBase downModel = models[Mathf.Clamp(downX,0,7), y + 1];
                                     if (downModel.Type == ModelType.Empty) {
                                         bool canFill = true;//是否满足垂直填充
                                         for (int aboveY = y; aboveY >= 0; aboveY--) {
@@ -179,12 +197,14 @@ public class GameManager : MonoBehaviour {
                                         }
                                         //斜向填充
                                         if (!canFill) {
-                                            Destroy(downModel.gameObject);
-                                            model.ModelMoveComponent.Move(downX, y + 1, fillTime);
-                                            models[downX, y + 1] = model;
-                                            CreatNewModel(x, y, ModelType.Empty);
-                                            notFinished = true;
-                                            break;
+                                            if (downModel.gameObject != null) {
+                                                Destroy(downModel.gameObject);
+                                                model.ModelMoveComponent.Move(downX, y + 1, t);
+                                                models[downX, y + 1] = model;
+                                                CreatNewModel(x, y, ModelType.Empty);
+                                                notFinished = true;
+                                                break;
+                                            }
                                         }
                                     }
                                 }
@@ -230,7 +250,7 @@ public class GameManager : MonoBehaviour {
                 m2.ModelMoveComponent.Move(tempX, tempY, fillTime);
                 if (m1.Type == ModelType.RainBow && m1.CanClear() && m2.CanClear()) {
                     ModelColorClearByType mcct = m1.transform.GetComponent<ModelColorClearByType>();
-                    Debug.Log(mcct == null);
+                    //Debug.Log(mcct == null);
                     if (mcct != null) {
                         mcct.Color = m2.ModelColorComponent.Color;
                         ClearByType(mcct.Color);
@@ -238,11 +258,11 @@ public class GameManager : MonoBehaviour {
                     m1.ModelClearComponent.Clear();
                     models[m1.X, m1.Y] = CreatNewModel(m1.X, m1.Y, ModelType.Empty);
                     ClearModel(m1.X, m1.Y);
-                    StartCoroutine(FillAll());//将消除后的空位进行填充
+                    //StartCoroutine(FillAll(fillTime));//将消除后的空位进行填充
                 }
                 if (m2.Type == ModelType.RainBow && m2.CanClear() && m1.CanClear()) {
                     ModelColorClearByType mcct = m2.transform.GetComponent<ModelColorClearByType>();
-                    Debug.Log(mcct == null);
+                    //Debug.Log(mcct == null);
                     if (mcct != null) {
                         mcct.Color = m1.ModelColorComponent.Color;
                         ClearByType(mcct.Color);
@@ -250,10 +270,10 @@ public class GameManager : MonoBehaviour {
                     m2.ModelClearComponent.Clear();
                     models[m2.X, m2.Y] = CreatNewModel(m2.X, m2.Y, ModelType.Empty);
                     ClearModel(m2.X, m2.Y);
-                    StartCoroutine(FillAll());//将消除后的空位进行填充
+                    //StartCoroutine(FillAll(time));//将消除后的空位进行填充
                 }
                 ClearAllMatchModels();//清除所有匹配的model
-                StartCoroutine(FillAll());//将消除后的空位进行填充
+                //StartCoroutine(FillAll(fillTime));//将消除后的空位进行填充
             }
             else {
                 //还原基础脚本
@@ -262,7 +282,7 @@ public class GameManager : MonoBehaviour {
                 models[m1.X, m1.Y].ModelMoveComponent.Undo(m1, m2, fillTime);//交换位置再还原
             }
         }
-        StartCoroutine(FillAll());//将消除后的空位进行填充
+        StartCoroutine(FillAll(fillTime));//将消除后的空位进行填充
     }
     //选中对象
     public void SelectModel(ModelBase m) {
@@ -287,7 +307,7 @@ public class GameManager : MonoBehaviour {
         if (IsNeighbor(selectModel, targetModel)) {
             ExchangeModel(selectModel, targetModel);
         }
-        StartCoroutine(FillAll());//将消除后的空位进行填充
+        StartCoroutine(FillAll(fillTime));//将消除后的空位进行填充
     }
     //匹配model
     public List<ModelBase> MatchModels(ModelBase model, int newX, int newY) {
@@ -320,8 +340,8 @@ public class GameManager : MonoBehaviour {
                 }
             }
             if (matchRow.Count >= 3) {
-                for (int i = 0; i < matchRow.Count; i++) {
-                    match.Add(matchRow[i]);
+                foreach (var r in matchRow) {
+                    match.Add(r);
                 }
             }
             //L T型匹配
@@ -404,10 +424,10 @@ public class GameManager : MonoBehaviour {
                         for (int xDistance = 1; xDistance < xCol; xDistance++) {
                             int x;
                             if (j == 0) {
-                                x = newY - xDistance;
+                                x = newX - xDistance;
                             }
                             else {
-                                x = newY + xDistance;
+                                x = newX + xDistance;
                             }
                             if (x < 0 || x >= xCol) {
                                 break;
@@ -437,6 +457,8 @@ public class GameManager : MonoBehaviour {
         }
         return null;
     }
+    //清除模块
+    #region Clear Module
     //清除model
     public bool ClearModel(int x, int y) {
         //当前model可以清除并且没有正在清除
@@ -445,6 +467,9 @@ public class GameManager : MonoBehaviour {
                 models[x, y].ModelClearComponent.Clear();//将model清除掉
                 CreatNewModel(x, y, ModelType.Empty);//原地生成一个新的空类型
                 ClearRoadblock(x, y);//清除障碍物
+                if (gameBegin) {
+                    PlayerPrefs.SetInt("ClearModelNums", PlayerPrefs.GetInt("ClearModelNums", 0) + 1);//记录消除块数
+                }
                 return true;
             }
         }
@@ -457,8 +482,11 @@ public class GameManager : MonoBehaviour {
             if (nearX != x && nearX >= 0 && nearX < xCol) {
                 if (models[nearX, y].CanClear() && models[nearX, y].Type == ModelType.Wall) {
                     //Debug.Log("clear");
-                    models[nearX, y].ModelClearComponent.Clear();//消除障碍物
-                    CreatNewModel(nearX, y, ModelType.Empty);//原地置空等待填充
+                    models[nearX, y].HP --;
+                    if (models[nearX, y].HP==0) {
+                        models[nearX, y].ModelClearComponent.Clear();//消除障碍物
+                        CreatNewModel(nearX, y, ModelType.Empty);//原地置空等待填充
+                    }
                 }
             }
         }
@@ -468,6 +496,9 @@ public class GameManager : MonoBehaviour {
                 if (models[x, nearY].CanClear() && models[x, nearY].Type == ModelType.Wall) {
                     //Debug.Log("clear");
                     models[x, nearY].ModelClearComponent.Clear();//消除障碍物
+                    if (gameBegin) {
+                        PlayerPrefs.SetInt("WallNums", PlayerPrefs.GetInt("WallNums", 0) + 1);//记录消除墙体个数
+                    }
                     CreatNewModel(x, nearY, ModelType.Empty);//原地置空等待填充
                 }
 
@@ -483,53 +514,77 @@ public class GameManager : MonoBehaviour {
                     List<ModelBase> matchList = MatchModels(models[x, y], x, y);
                     if (matchList != null) {
                         int num = matchList.Count;
+                        //根据消除个数处理分数
+                        if (gameBegin) {
+                            switch (num) {
+                                case 3:
+                                    scoreStep = 10;
+                                    score += scoreStep;
+                                    break;
+                                case 4:
+                                    Excellent(0);
+                                    scoreStep = 20;
+                                    score += scoreStep;
+                                    break;
+                                case 5:
+                                    scoreStep = 30;
+                                    score += scoreStep;
+                                    Excellent(1);
+                                    gameTime += 3;
+                                    PlayerPrefs.SetInt("TimeAddNums", PlayerPrefs.GetInt("TimeAddNums", 0) + 3);//记录累计加时
+                                    break;
+                                case 6:
+                                    scoreStep = 60;
+                                    score += scoreStep;
+                                    Excellent(2);
+                                    gameTime += 3;
+                                    PlayerPrefs.SetInt("TimeAddNums", PlayerPrefs.GetInt("TimeAddNums", 0) + 3);//记录累计加时
+                                    break;
+                                case 7:
+                                    scoreStep = 100;
+                                    score += scoreStep;
+                                    Excellent(3);
+                                    gameTime += 3;
+                                    PlayerPrefs.SetInt("TimeAddNums", PlayerPrefs.GetInt("TimeAddNums", 0) + 3);//记录累计加时
+                                    break;
+                            }
+                        }
+                       
+                        //生成奖励块
                         ModelType specialModelType = ModelType.Count;//是否产生特殊奖励
                         ModelBase model = matchList[0];
                         int specialModelX = model.X;
                         int specialModelY = model.Y;
-
-                        if (num >= 3 && Random.Range(0,2)==0) {
-                            specialModelType = ModelType.CrossClear;
-                        }
-                        else {
-                            //Debug.Log(matchList.Count);
-                            specialModelType = ModelType.RainBow;
+                        if (num >= 3) {
+                            if ( Random.Range(0, 3) == 0) {
+                                specialModelType = ModelType.CrossClear;
+                            }
+                            else if (Random.Range(0, 3) == 1) {
+                                //Debug.Log(matchList.Count);
+                                specialModelType = ModelType.RainBow;
+                            }
                         }
                         foreach (var m in matchList) {
                             if (ClearModel(m.X, m.Y)) {
                                 needFill = true;
                             }
                         }
-                        if (specialModelType != ModelType.Count && (time >=0f&&time<0.2f) || (time >= 2f && time < 2.2f) || (time >= 4f&& time < 4.2f)|| (time >= 6f && time < 6.2f) || (time >= 8f && time < 8.2f)) {
-                            Destroy(models[specialModelX, specialModelY].gameObject);
+                        if (specialModelType != ModelType.Count && (time >= 2f && time < 2.1f) || (time >= 4f && time < 4.1f) || (time >= 6f && time < 6.1f) || (time >= 8f && time < 8.1f)) {
+                          //if (specialModelType != ModelType.Count) {
+                            Destroy(models[specialModelX, specialModelY]);
                             specialModelType = Random.Range(0, 2) == 1 ? ModelType.CrossClear : ModelType.RainBow;
-                            ModelBase newModel = CreatNewModel(specialModelX, specialModelY,specialModelType );
-                            //十字消除
-                            if (specialModelType == ModelType.CrossClear && newModel.CanColor() && matchList[0].CanColor()) {
-                                newModel.ModelColorComponent.SetColor(ModelColor.ColorType.Cross);
-                            }
-                            //类型消除的产生
-                            else if (specialModelType == ModelType.RainBow && newModel.CanColor()) {
-                                newModel.ModelColorComponent.SetColor(ModelColor.ColorType.Rainbow);
+                            ModelBase newModel = CreatNewModel(specialModelX, specialModelY, specialModelType);
+                            if (Random.Range(0, 3) == 2) {
+                                //十字消除
+                                if (specialModelType == ModelType.CrossClear && newModel.CanColor() && matchList[0].CanColor()) {
+                                    newModel.ModelColorComponent.SetColor(ModelColor.ColorType.Cross);
+                                }
+                                //类型消除的产生
+                                else if (specialModelType == ModelType.RainBow && newModel.CanColor()) {
+                                    newModel.ModelColorComponent.SetColor(ModelColor.ColorType.Rainbow);
+                                }
                             }
                             models[specialModelX, specialModelY] = newModel;
-                        }
-                        //根据消除个数处理分数
-                        switch (num) {
-                            case 3:
-                                score += 10;
-                                break;
-                            case 4:
-                                Excellent(0);
-                                score += 20; break;
-                            case 5:
-                                score += 30;
-                                Excellent(1);
-                                break;
-                            case 6: score += 60; break;
-                            case 7: score += 150; break;
-                            case 8: score += 300; break;
-                            case 9: score += 500; break;
                         }
                     }
                 }
@@ -539,41 +594,60 @@ public class GameManager : MonoBehaviour {
     }
     //同类型消除
     public void ClearByType(ModelColor.ColorType color) {
-        Debug.Log("qingchucaihong");
-        int count = 0;
-        for (int x = 0; x < xCol; x++) {
-            for (int y = 0; y < yRow; y++) {
-                if (models[x, y].CanColor() && (models[x, y].ModelColorComponent.Color == color || color == ModelColor.ColorType.Rainbow)) {
-                    count++;
-                    //Debug.Log(models.);
-                    ClearModel(x, y);
+        if (gameBegin) {
+            PlayerPrefs.SetInt("RainbowNums", PlayerPrefs.GetInt("RainbowNums", 0) + 1);//记录彩虹个数
+            awardNums++;
+            PlayerPrefs.SetInt("LuckDog", awardNums);
+            //Debug.Log("qingchucaihong");
+            int count = 0;
+            for (int x = 0; x < xCol; x++) {
+                for (int y = 0; y < yRow; y++) {
+                    if (models[x, y].CanColor() && (models[x, y].ModelColorComponent.Color == color || color == ModelColor.ColorType.Rainbow)) {
+                        count++;
+                        //Debug.Log(models.);
+                        ClearModel(x, y);
+                    }
                 }
             }
+            score += 5 * count;
+            StartCoroutine(FillAll(fillTime));
         }
-        score += 5 * count;
-        StartCoroutine(FillAll());
     }
     //十字消除
     public void ClearCross(int x, int y) {
-        Debug.Log("cross");
-        for (int i = 0; i < xCol; i++) {
-            ClearModel(i, y);
-        }
-        for (int j = 0; j < yRow; j++) {
-            if (j != y) {
-                ClearModel(x, j);
+        if (gameBegin) {
+            PlayerPrefs.SetInt("CrossNums", PlayerPrefs.GetInt("CrossNums", 0) + 1);//记录十字个数
+            awardNums++;
+            //Debug.Log("cross");
+            for (int i = 0; i < xCol; i++) {
+                ClearModel(i, y);
             }
+            for (int j = 0; j < yRow; j++) {
+                if (j != y) {
+                    ClearModel(x, j);
+                }
+            }
+            score += 80;
+            if (models[x,y]!=null) {
+                models[x, y].ModelClearComponent.Clear();
+                models[x, y] = CreatNewModel(x, y, ModelType.Empty);
+            }
+            StartCoroutine(FillAll(fillTime));
         }
-        score += 80;
-        models[x, y].ModelClearComponent.Clear();
-        models[x, y] = CreatNewModel(x, y, ModelType.Empty);
-        StartCoroutine(FillAll());
     }
+    #endregion
     //处理UI界面的事件
+    #region UI Events
     public void Excellent(int index) {
         Instantiate(excellent[index], spawn);
+        if (index!=0) {
+            GameObject go = Instantiate(timeAddEffetc, canvas);
+            go.GetComponent<RectTransform>().anchoredPosition = new Vector2(700, 800);
+            go.transform.rotation = Quaternion.Euler(new Vector3(0, 0, 180));
+        }
     }
     public void Pause() {
+        //pausePanel.GetComponent<Animator>().SetTrigger("close");
         pausePanel.SetActive(true);
         pausePanel.GetComponent<Animator>().SetTrigger("open");
         if (canAudio) {
@@ -591,7 +665,9 @@ public class GameManager : MonoBehaviour {
 
     public void Replay() {
         Time.timeScale = 1;
-        gameoverPanel.GetComponent<Animator>().SetTrigger("close");
+        if (gameoverPanel.activeInHierarchy) {
+            gameoverPanel.GetComponent<Animator>().SetTrigger("close");
+        }
         SceneManager.LoadScene(1);
     }
     public void Quit() {
@@ -599,6 +675,7 @@ public class GameManager : MonoBehaviour {
         gameoverPanel.GetComponent<Animator>().SetTrigger("close");
         SceneManager.LoadScene(0);
     }
+    //界面显示
     public void AboutUsDisplay() {
         Time.timeScale = 1;
         pausePanel.GetComponent<Animator>().SetTrigger("close");
@@ -629,8 +706,13 @@ public class GameManager : MonoBehaviour {
             PlayerPrefs.SetInt("Audio", 1);
         }
     }
-
+    //游戏结束的逻辑
     public void GameOver() {
+        if (awardNums>PlayerPrefs.GetInt("LuckDog",0)) {
+            PlayerPrefs.SetInt("LuckDog",awardNums);
+        }
+        PlayerPrefs.SetInt("TotalScore", (PlayerPrefs.GetInt("TotalScore", 0) + score));//记录累计分数
+        Debug.Log(score+" "+ PlayerPrefs.GetInt("TotalScore", 0));
         if (score > PlayerPrefs.GetInt("HistoryHighestScore", 0)) {
             PlayerPrefs.SetInt("HistoryHighestScore", score);
             breakRecord.SetActive(true);
@@ -638,5 +720,8 @@ public class GameManager : MonoBehaviour {
         gameoverPanel.GetComponent<Animator>().SetTrigger("display");
         overScoreText.text = score.ToString();
         historySoreText.text = PlayerPrefs.GetInt("HistoryHighestScore").ToString();
+        StartCoroutine(FillAll(0.1f));
     }
+    #endregion
+
 }
