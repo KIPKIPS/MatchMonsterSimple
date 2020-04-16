@@ -41,7 +41,7 @@ GameObject:
   - component: {fileID: 95155990208491332}
   - component: {fileID: 114061414710099958}
   m_Layer: 5
-  m_Name: TimeAdd
+  m_Name: TimeAdd_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
