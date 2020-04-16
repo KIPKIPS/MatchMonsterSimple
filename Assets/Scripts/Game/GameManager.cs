@@ -57,9 +57,13 @@ public class GameManager : MonoBehaviour {
     private int scoreStep;
 
     public Transform canvas;
-    public GameObject timeAddEffetc;
+    public GameObject[] timeAddEffetc;
     public int awardNums;
+    public Text curStep;
+    //二次移动
+    public int step;
     void Awake() {
+        step = 0;
         //Destroy(this);
         awardNums = 0;
         gameBegin = false;
@@ -103,6 +107,7 @@ public class GameManager : MonoBehaviour {
     }
 
     void Update() {
+        //Debug.Log(step);
         if (gameover) {
             return;
         }
@@ -243,46 +248,101 @@ public class GameManager : MonoBehaviour {
         if (m1.CanMove() && m2.CanMove()) {
             models[m1.X, m1.Y] = m2;
             models[m2.X, m2.Y] = m1;
-            if (MatchModels(m2, m1.X, m1.Y) != null || MatchModels(m1, m2.X, m2.Y) != null || m1.Type == ModelType.RainBow || m2.Type == ModelType.RainBow) {
-                int tempX = m1.X;
-                int tempY = m1.Y;
-                m1.ModelMoveComponent.Move(m2.X, m2.Y, fillTime);//交换
-                m2.ModelMoveComponent.Move(tempX, tempY, fillTime);
-                if (m1.Type == ModelType.RainBow && m1.CanClear() && m2.CanClear()) {
-                    ModelColorClearByType mcct = m1.transform.GetComponent<ModelColorClearByType>();
-                    //Debug.Log(mcct == null);
-                    if (mcct != null) {
-                        mcct.Color = m2.ModelColorComponent.Color;
-                        ClearByType(mcct.Color);
+            if (step==0) {
+                if (MatchModels(m2, m1.X, m1.Y) != null || MatchModels(m1, m2.X, m2.Y) != null || m1.Type == ModelType.RainBow || m2.Type == ModelType.RainBow) {
+                    int tempX = m1.X;
+                    int tempY = m1.Y;
+                    m1.ModelMoveComponent.Move(m2.X, m2.Y, fillTime);//交换
+                    m2.ModelMoveComponent.Move(tempX, tempY, fillTime);
+                    if (m1.Type == ModelType.RainBow && m1.CanClear() && m2.CanClear()) {
+                        ModelColorClearByType mcct = m1.transform.GetComponent<ModelColorClearByType>();
+                        //Debug.Log(mcct == null);
+                        if (mcct != null) {
+                            mcct.Color = m2.ModelColorComponent.Color;
+                            ClearByType(mcct.Color);
+                        }
+                        m1.ModelClearComponent.Clear();
+                        models[m1.X, m1.Y] = CreatNewModel(m1.X, m1.Y, ModelType.Empty);
+                        ClearModel(m1.X, m1.Y);
+                        //StartCoroutine(FillAll(fillTime));//将消除后的空位进行填充
                     }
-                    m1.ModelClearComponent.Clear();
-                    models[m1.X, m1.Y] = CreatNewModel(m1.X, m1.Y, ModelType.Empty);
-                    ClearModel(m1.X, m1.Y);
-                    //StartCoroutine(FillAll(fillTime));//将消除后的空位进行填充
-                }
-                if (m2.Type == ModelType.RainBow && m2.CanClear() && m1.CanClear()) {
-                    ModelColorClearByType mcct = m2.transform.GetComponent<ModelColorClearByType>();
-                    //Debug.Log(mcct == null);
-                    if (mcct != null) {
-                        mcct.Color = m1.ModelColorComponent.Color;
-                        ClearByType(mcct.Color);
+                    if (m2.Type == ModelType.RainBow && m2.CanClear() && m1.CanClear()) {
+                        ModelColorClearByType mcct = m2.transform.GetComponent<ModelColorClearByType>();
+                        //Debug.Log(mcct == null);
+                        if (mcct != null) {
+                            mcct.Color = m1.ModelColorComponent.Color;
+                            ClearByType(mcct.Color);
+                        }
+                        m2.ModelClearComponent.Clear();
+                        models[m2.X, m2.Y] = CreatNewModel(m2.X, m2.Y, ModelType.Empty);
+                        ClearModel(m2.X, m2.Y);
+                        //StartCoroutine(FillAll(time));//将消除后的空位进行填充
                     }
-                    m2.ModelClearComponent.Clear();
-                    models[m2.X, m2.Y] = CreatNewModel(m2.X, m2.Y, ModelType.Empty);
-                    ClearModel(m2.X, m2.Y);
-                    //StartCoroutine(FillAll(time));//将消除后的空位进行填充
+                    ClearAllMatchModels();//清除所有匹配的model
+                    StartCoroutine(FillAll(fillTime));//将消除后的空位进行填充
+                    selectModel = null;
+                    targetModel = null;
+                    step = 0;
+                    curStep.text = "0";
                 }
-                ClearAllMatchModels();//清除所有匹配的model
-                //StartCoroutine(FillAll(fillTime));//将消除后的空位进行填充
+                else {
+                    int tempX = m1.X;
+                    int tempY = m1.Y;
+                    m1.ModelMoveComponent.Move(m2.X, m2.Y, fillTime);//交换
+                    m2.ModelMoveComponent.Move(tempX, tempY, fillTime);
+                    step++;
+                    targetModel = null;
+                    curStep.text = "1";
+                }
             }
             else {
-                //还原基础脚本
-                models[m1.X, m1.Y] = m1;
-                models[m2.X, m2.Y] = m2;
-                models[m1.X, m1.Y].ModelMoveComponent.Undo(m1, m2, fillTime);//交换位置再还原
+                if (MatchModels(m2, m1.X, m1.Y) != null || MatchModels(m1, m2.X, m2.Y) != null || m1.Type == ModelType.RainBow || m2.Type == ModelType.RainBow) {
+                    int tempX = m1.X;
+                    int tempY = m1.Y;
+                    m1.ModelMoveComponent.Move(m2.X, m2.Y, fillTime);//交换
+                    m2.ModelMoveComponent.Move(tempX, tempY, fillTime);
+                    if (m1.Type == ModelType.RainBow && m1.CanClear() && m2.CanClear()) {
+                        ModelColorClearByType mcct = m1.transform.GetComponent<ModelColorClearByType>();
+                        //Debug.Log(mcct == null);
+                        if (mcct != null) {
+                            mcct.Color = m2.ModelColorComponent.Color;
+                            ClearByType(mcct.Color);
+                        }
+                        m1.ModelClearComponent.Clear();
+                        models[m1.X, m1.Y] = CreatNewModel(m1.X, m1.Y, ModelType.Empty);
+                        ClearModel(m1.X, m1.Y);
+                        //StartCoroutine(FillAll(fillTime));//将消除后的空位进行填充
+                    }
+                    if (m2.Type == ModelType.RainBow && m2.CanClear() && m1.CanClear()) {
+                        ModelColorClearByType mcct = m2.transform.GetComponent<ModelColorClearByType>();
+                        //Debug.Log(mcct == null);
+                        if (mcct != null) {
+                            mcct.Color = m1.ModelColorComponent.Color;
+                            ClearByType(mcct.Color);
+                        }
+                        m2.ModelClearComponent.Clear();
+                        models[m2.X, m2.Y] = CreatNewModel(m2.X, m2.Y, ModelType.Empty);
+                        ClearModel(m2.X, m2.Y);
+                        //StartCoroutine(FillAll(time));//将消除后的空位进行填充
+                    }
+                    ClearAllMatchModels();//清除所有匹配的model
+                    StartCoroutine(FillAll(fillTime));//将消除后的空位进行填充
+                    selectModel = null;
+                    targetModel = null;
+                    step = 0;
+                    curStep.text = "0";
+                }
+                else {
+                    //还原基础脚本
+                    models[m1.X, m1.Y] = m1;
+                    models[m2.X, m2.Y] = m2;
+                    models[m1.X, m1.Y].ModelMoveComponent.Undo(m1, m2, fillTime);//交换位置再还原
+                    step = 1;
+                    curStep.text = "1";
+                }
             }
         }
-        StartCoroutine(FillAll(fillTime));//将消除后的空位进行填充
+        //StartCoroutine(FillAll(fillTime));//将消除后的空位进行填充
     }
     //选中对象
     public void SelectModel(ModelBase m) {
@@ -537,15 +597,15 @@ public class GameManager : MonoBehaviour {
                                     scoreStep = 60;
                                     score += scoreStep;
                                     Excellent(2);
-                                    gameTime += 3;
-                                    PlayerPrefs.SetInt("TimeAddNums", PlayerPrefs.GetInt("TimeAddNums", 0) + 3);//记录累计加时
+                                    gameTime += 5;
+                                    PlayerPrefs.SetInt("TimeAddNums", PlayerPrefs.GetInt("TimeAddNums", 0) + 5);//记录累计加时
                                     break;
                                 case 7:
                                     scoreStep = 100;
                                     score += scoreStep;
                                     Excellent(3);
-                                    gameTime += 3;
-                                    PlayerPrefs.SetInt("TimeAddNums", PlayerPrefs.GetInt("TimeAddNums", 0) + 3);//记录累计加时
+                                    gameTime += 10;
+                                    PlayerPrefs.SetInt("TimeAddNums", PlayerPrefs.GetInt("TimeAddNums", 0) + 10);//记录累计加时
                                     break;
                             }
                         }
@@ -641,8 +701,12 @@ public class GameManager : MonoBehaviour {
     public void Excellent(int index) {
         Instantiate(excellent[index], spawn);
         if (index!=0) {
-            GameObject go = Instantiate(timeAddEffetc, canvas);
-            go.GetComponent<RectTransform>().anchoredPosition = new Vector2(700, 800);
+            GameObject go = Instantiate(timeAddEffetc[index], canvas);
+            switch (index) {
+                case 1: go.GetComponent<RectTransform>().anchoredPosition = new Vector2(700, 800);break;
+                case 2: go.GetComponent<RectTransform>().anchoredPosition = new Vector2(774, 697); break;
+                case 3: go.GetComponent<RectTransform>().anchoredPosition = new Vector2(774, 697); break;
+            }
             go.transform.rotation = Quaternion.Euler(new Vector3(0, 0, 180));
         }
     }

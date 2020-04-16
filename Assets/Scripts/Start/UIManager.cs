@@ -209,14 +209,14 @@ public class UIManager : MonoBehaviour {
         totalScoreText.text = PlayerPrefs.GetInt("TotalScore", 0) + "";
         Debug.Log(PlayerPrefs.GetInt("TotalScore", 0));
         
-        crossLock.SetActive(PlayerPrefs.GetInt("CrossNums", 0) < 1);
-        rainbowLock.SetActive(PlayerPrefs.GetInt("RainbowNums", 0) < 1);
-        timeAddLock.SetActive(PlayerPrefs.GetInt("TimeAddNums", 0) < 1);
-        monsterKillerLock.SetActive(PlayerPrefs.GetInt("ClearModelNums", 0) <1);
-        playTimeLock.SetActive(PlayerPrefs.GetInt("PlayTimes", 0) < 2);
-        totalScoreLock.SetActive(PlayerPrefs.GetInt("TotalScore", 0) < 20);
-        luckDogLock.SetActive(PlayerPrefs.GetInt("LuckDog", 0) < 1);
-        wallBreakLock.SetActive(PlayerPrefs.GetInt("WallNums", 0) < 1);
+        crossLock.SetActive(PlayerPrefs.GetInt("CrossNums", 0) < 10);
+        rainbowLock.SetActive(PlayerPrefs.GetInt("RainbowNums", 0) < 10);
+        timeAddLock.SetActive(PlayerPrefs.GetInt("TimeAddNums", 0) < 30);
+        monsterKillerLock.SetActive(PlayerPrefs.GetInt("ClearModelNums", 0) <100);
+        playTimeLock.SetActive(PlayerPrefs.GetInt("PlayTimes", 0) < 5);
+        totalScoreLock.SetActive(PlayerPrefs.GetInt("TotalScore", 0) < 1000);
+        luckDogLock.SetActive(PlayerPrefs.GetInt("LuckDog", 0) < 10);
+        wallBreakLock.SetActive(PlayerPrefs.GetInt("WallNums", 0) < 100);
         //
         achievementPanel.SetActive(true);
         achievementPanel.GetComponent<Animator>().SetTrigger("open");
