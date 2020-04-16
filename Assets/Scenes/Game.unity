@@ -1126,7 +1126,7 @@ MonoBehaviour:
   canAudio: 0
   scoreText: {fileID: 950096173}
   restTimeText: {fileID: 1810730478}
-  gameTime: 120
+  gameTime: 90
   gameover: 0
   score: 0
   gameoverPanel: {fileID: 1280604860}
@@ -1151,6 +1151,7 @@ MonoBehaviour:
   awardNums: 0
   curStep: {fileID: 225033833}
   step: 0
+  isSkill: 0
 --- !u!4 &364472541
 Transform:
   m_ObjectHideFlags: 0
@@ -5413,7 +5414,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 60
+  m_Text: 90
 --- !u!222 &1810730479
 CanvasRenderer:
   m_ObjectHideFlags: 0

@@ -145,9 +145,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e9ccf7d3630cd74458ba46ee128d9068, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  x: 0
+  HP: 0
+  y: 0
+  type: 0
   manager: {fileID: 0}
+  modelMoveComponent: {fileID: 0}
+  modelColorComponent: {fileID: 0}
   effect_Row: {fileID: 0}
   effect_Col: {fileID: 0}
+  modelClearComponent: {fileID: 0}
 --- !u!114 &114297689640302842
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -159,6 +166,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 87a7f5b1c27a1864294fa4b17f65adc7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  color: 0
   colorSprites:
   - color: 0
     sprite: {fileID: 21300000, guid: 7bd90880b5fa36b4f838cb504cd8095a, type: 3}
@@ -168,6 +176,8 @@ MonoBehaviour:
     sprite: {fileID: 21300004, guid: 7bd90880b5fa36b4f838cb504cd8095a, type: 3}
   - color: 3
     sprite: {fileID: 21300006, guid: 7bd90880b5fa36b4f838cb504cd8095a, type: 3}
+  - color: 4
+    sprite: {fileID: 21300008, guid: 7bd90880b5fa36b4f838cb504cd8095a, type: 3}
   highlightSprites:
   - color: 0
     sprite: {fileID: 21300000, guid: 4636fe7cb797d064687735428cc47628, type: 3}
@@ -176,6 +186,8 @@ MonoBehaviour:
   - color: 2
     sprite: {fileID: 21300000, guid: 4636fe7cb797d064687735428cc47628, type: 3}
   - color: 3
+    sprite: {fileID: 21300000, guid: 4636fe7cb797d064687735428cc47628, type: 3}
+  - color: 4
     sprite: {fileID: 21300000, guid: 4636fe7cb797d064687735428cc47628, type: 3}
   sprite: {fileID: 0}
   spriteHighlight: {fileID: 0}
@@ -193,6 +205,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   destoryAnim: {fileID: 7400000, guid: dc88c8305534d8e4bb765ec3a4dbcc4c, type: 2}
+  isClearing: 0
   modelBase: {fileID: 0}
   destoryNormalAudio: {fileID: 8300000, guid: 9cb19eb032d304b07acec596ae2ce4a4, type: 3}
 --- !u!114 &114491087335039944

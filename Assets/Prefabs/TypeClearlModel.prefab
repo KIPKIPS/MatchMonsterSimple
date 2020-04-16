@@ -47,7 +47,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!1 &1482489972629806
 GameObject:
   m_ObjectHideFlags: 0
@@ -132,8 +132,8 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1452892651469534}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.6, y: 0.6, z: 0.6}
+  m_LocalPosition: {x: -0.03, y: 0, z: 0}
+  m_LocalScale: {x: 0.54, y: 0.54, z: 0.6}
   m_Children: []
   m_Father: {fileID: 4985397991148292}
   m_RootOrder: 1
@@ -159,7 +159,7 @@ Transform:
   m_GameObject: {fileID: 1503455806571690}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -0.025, y: 0, z: 0}
-  m_LocalScale: {x: 0.5475, y: 0.5325002, z: 0.6}
+  m_LocalScale: {x: 0.54, y: 0.54, z: 0.6}
   m_Children: []
   m_Father: {fileID: 4985397991148292}
   m_RootOrder: 0
@@ -230,11 +230,12 @@ MonoBehaviour:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1200505120654946}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 87a7f5b1c27a1864294fa4b17f65adc7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  color: 0
   colorSprites:
   - color: 0
     sprite: {fileID: 21300000, guid: 7bd90880b5fa36b4f838cb504cd8095a, type: 3}
@@ -245,8 +246,10 @@ MonoBehaviour:
   - color: 3
     sprite: {fileID: 21300006, guid: 7bd90880b5fa36b4f838cb504cd8095a, type: 3}
   - color: 4
-    sprite: {fileID: 21300000, guid: a76997927b1b4ab48b3d923f291a3b69, type: 3}
+    sprite: {fileID: 21300008, guid: 7bd90880b5fa36b4f838cb504cd8095a, type: 3}
   - color: 5
+    sprite: {fileID: 21300000, guid: a76997927b1b4ab48b3d923f291a3b69, type: 3}
+  - color: 6
     sprite: {fileID: 21300000, guid: 04b494836b15fe14d82b88d62fef5de2, type: 3}
   highlightSprites:
   - color: 0
@@ -258,8 +261,10 @@ MonoBehaviour:
   - color: 3
     sprite: {fileID: 21300006, guid: 4636fe7cb797d064687735428cc47628, type: 3}
   - color: 4
-    sprite: {fileID: 21300000, guid: 255cce32ff0c4f640ac17654f0fd71b8, type: 3}
+    sprite: {fileID: 21300000, guid: 4636fe7cb797d064687735428cc47628, type: 3}
   - color: 5
+    sprite: {fileID: 21300000, guid: 255cce32ff0c4f640ac17654f0fd71b8, type: 3}
+  - color: 6
     sprite: {fileID: 21300000, guid: 870a15a6b281771478e83f435bce7aa4, type: 3}
   sprite: {fileID: 0}
   spriteHighlight: {fileID: 0}
@@ -276,9 +281,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e9ccf7d3630cd74458ba46ee128d9068, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  x: 0
+  HP: 0
+  y: 0
+  type: 0
   manager: {fileID: 0}
+  modelMoveComponent: {fileID: 0}
+  modelColorComponent: {fileID: 0}
   effect_Row: {fileID: 1371643421035422, guid: cd877ebaf7107214d91a404a441c7630, type: 2}
   effect_Col: {fileID: 1510235492666666, guid: eca0908fbf66a64418f9739248a1da4c, type: 2}
+  modelClearComponent: {fileID: 0}
 --- !u!114 &114662380874715284
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -304,9 +316,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   destoryAnim: {fileID: 7400000, guid: c6917ba16f3608a4883e553e22f488f8, type: 2}
+  isClearing: 0
   modelBase: {fileID: 0}
   destoryNormalAudio: {fileID: 8300000, guid: 5aaa4c7d5781546c6a13a9f1eb97b15b, type: 3}
-  color: 0
+  color: 6
 --- !u!212 &212300752368659550
 SpriteRenderer:
   m_ObjectHideFlags: 1

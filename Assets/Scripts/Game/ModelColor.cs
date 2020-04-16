@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class ModelColor : MonoBehaviour {
     public enum ColorType {
-        Blue, Green, Red, Purple,Cross, Rainbow, Count
+        Blue, Green, Red, Purple,Pink,Cross, Rainbow, Count
     }
 
     public ColorType color;

@@ -60,9 +60,11 @@ public class GameManager : MonoBehaviour {
     public GameObject[] timeAddEffetc;
     public int awardNums;
     public Text curStep;
-    //二次移动
-    public int step;
+
+    public int step; //二次移动
+    public bool isSkill;
     void Awake() {
+        isSkill = false;
         step = 0;
         //Destroy(this);
         awardNums = 0;
@@ -103,7 +105,8 @@ public class GameManager : MonoBehaviour {
                 CreatNewModel(x, y, ModelType.Empty);
             }
         }
-
+        Destroy(models[4, 4].gameObject);
+        models[4, 4] = CreatNewModel(4, 4, ModelType.CrossClear);
     }
 
     void Update() {
@@ -112,7 +115,6 @@ public class GameManager : MonoBehaviour {
             return;
         }
         time += Time.deltaTime;
-        time %= 10;
         //Debug.Log(time);
         if (gameTime <= 0) {
             gameTime = 0;
@@ -154,9 +156,11 @@ public class GameManager : MonoBehaviour {
             //清除匹配的model
             needFill = ClearAllMatchModels();
         }
+        isSkill = false;
     }
     //分布填充
     public bool Fill(float t) {
+        isSkill = true;
         bool notFinished = false;//本次填充是否完成
         for (int y = yRow - 2; y >= 0; y--) {
             for (int x = 0; x < xCol; x++) {
@@ -169,7 +173,7 @@ public class GameManager : MonoBehaviour {
                             Destroy(modelBelow.gameObject);
                             model.ModelMoveComponent.Move(x, y + 1, t);//向下移动
                             models[x, y + 1] = model;//正下方的组件指向当前组件
-                            if (Random.Range(0,100)==1) {
+                            if (Random.Range(0, 100) == 1) {
                                 CreatNewModel(x, y, ModelType.Wall);//设置障碍物
                             }
                             else {
@@ -187,7 +191,7 @@ public class GameManager : MonoBehaviour {
                             if (down != 0) {
                                 int downX = x + down;
                                 if (downX >= 0 && downX < xCol) {//排除最右侧
-                                    ModelBase downModel = models[Mathf.Clamp(downX,0,7), y + 1];
+                                    ModelBase downModel = models[Mathf.Clamp(downX, 0, 7), y + 1];
                                     if (downModel.Type == ModelType.Empty) {
                                         bool canFill = true;//是否满足垂直填充
                                         for (int aboveY = y; aboveY >= 0; aboveY--) {
@@ -248,7 +252,7 @@ public class GameManager : MonoBehaviour {
         if (m1.CanMove() && m2.CanMove()) {
             models[m1.X, m1.Y] = m2;
             models[m2.X, m2.Y] = m1;
-            if (step==0) {
+            if (step == 0) {
                 if (MatchModels(m2, m1.X, m1.Y) != null || MatchModels(m1, m2.X, m2.Y) != null || m1.Type == ModelType.RainBow || m2.Type == ModelType.RainBow) {
                     int tempX = m1.X;
                     int tempY = m1.Y;
@@ -344,6 +348,100 @@ public class GameManager : MonoBehaviour {
         }
         //StartCoroutine(FillAll(fillTime));//将消除后的空位进行填充
     }
+    //新的交换规则
+    private void ExchangeModel_New(ModelBase m1, ModelBase m2) {
+        if (m1.CanMove() && m2.CanMove()) {
+            models[m1.X, m1.Y] = m2;
+            models[m2.X, m2.Y] = m1;
+            if (step == 0) {
+                if (MatchModels(m2, m1.X, m1.Y) != null || MatchModels(m1, m2.X, m2.Y) != null || m1.Type == ModelType.RainBow || m2.Type == ModelType.RainBow) {
+                    int tempX = m1.X;
+                    int tempY = m1.Y;
+                    m1.ModelMoveComponent.Move(m2.X, m2.Y, fillTime);//交换
+                    m2.ModelMoveComponent.Move(tempX, tempY, fillTime);
+                    if (m1.Type == ModelType.RainBow && m1.CanClear() && m2.CanClear()) {
+                        ModelColorClearByType mcct = m1.transform.GetComponent<ModelColorClearByType>();
+                        if (mcct != null) {
+                            mcct.Color = m2.ModelColorComponent.Color;
+                            ClearByType(mcct.Color);
+                        }
+                        m1.ModelClearComponent.Clear();
+                        models[m1.X, m1.Y] = CreatNewModel(m1.X, m1.Y, ModelType.Empty);
+                        ClearModel(m1.X, m1.Y);
+                    }
+                    if (m2.Type == ModelType.RainBow && m2.CanClear() && m1.CanClear()) {
+                        ModelColorClearByType mcct = m2.transform.GetComponent<ModelColorClearByType>();
+                        if (mcct != null) {
+                            mcct.Color = m1.ModelColorComponent.Color;
+                            ClearByType(mcct.Color);
+                        }
+                        m2.ModelClearComponent.Clear();
+                        models[m2.X, m2.Y] = CreatNewModel(m2.X, m2.Y, ModelType.Empty);
+                        ClearModel(m2.X, m2.Y);
+                    }
+                    ClearAllMatchModels();//清除所有匹配的model
+                    StartCoroutine(FillAll(fillTime));//将消除后的空位进行填充
+                    selectModel = null;
+                    targetModel = null;
+                    step = 0;
+                    curStep.text = "0";
+                }
+                else {
+                    int tempX = m1.X;
+                    int tempY = m1.Y;
+                    m1.ModelMoveComponent.Move(m2.X, m2.Y, fillTime);//交换
+                    m2.ModelMoveComponent.Move(tempX, tempY, fillTime);
+                    step++;
+                    targetModel = null;
+                    curStep.text = "1";
+                }
+            }
+            else {
+                if (MatchModels(m2, m1.X, m1.Y) != null || MatchModels(m1, m2.X, m2.Y) != null || m1.Type == ModelType.RainBow || m2.Type == ModelType.RainBow) {
+                    int tempX = m1.X;
+                    int tempY = m1.Y;
+                    m1.ModelMoveComponent.Move(m2.X, m2.Y, fillTime);//交换
+                    m2.ModelMoveComponent.Move(tempX, tempY, fillTime);
+                    if (m1.Type == ModelType.RainBow && m1.CanClear() && m2.CanClear()) {
+                        ModelColorClearByType mcct = m1.transform.GetComponent<ModelColorClearByType>();
+                        //Debug.Log(mcct == null);
+                        if (mcct != null) {
+                            mcct.Color = m2.ModelColorComponent.Color;
+                            ClearByType(mcct.Color);
+                        }
+                        m1.ModelClearComponent.Clear();
+                        models[m1.X, m1.Y] = CreatNewModel(m1.X, m1.Y, ModelType.Empty);
+                        ClearModel(m1.X, m1.Y);
+                    }
+                    if (m2.Type == ModelType.RainBow && m2.CanClear() && m1.CanClear()) {
+                        ModelColorClearByType mcct = m2.transform.GetComponent<ModelColorClearByType>();
+                        //Debug.Log(mcct == null);
+                        if (mcct != null) {
+                            mcct.Color = m1.ModelColorComponent.Color;
+                            ClearByType(mcct.Color);
+                        }
+                        m2.ModelClearComponent.Clear();
+                        models[m2.X, m2.Y] = CreatNewModel(m2.X, m2.Y, ModelType.Empty);
+                        ClearModel(m2.X, m2.Y);
+                    }
+                    ClearAllMatchModels();//清除所有匹配的model
+                    StartCoroutine(FillAll(fillTime));//将消除后的空位进行填充
+                    selectModel = null;
+                    targetModel = null;
+                    step = 0;
+                    curStep.text = "0";
+                }
+                else {
+                    //还原基础脚本
+                    models[m1.X, m1.Y] = m1;
+                    models[m2.X, m2.Y] = m2;
+                    models[m1.X, m1.Y].ModelMoveComponent.Undo(m1, m2, fillTime);//交换位置再还原
+                    step = 1;
+                    curStep.text = "1";
+                }
+            }
+        }
+    }
     //选中对象
     public void SelectModel(ModelBase m) {
         if (gameover) {
@@ -366,6 +464,7 @@ public class GameManager : MonoBehaviour {
         }
         if (IsNeighbor(selectModel, targetModel)) {
             ExchangeModel(selectModel, targetModel);
+            //ExchangeModel_New(selectModel, targetModel);
         }
         StartCoroutine(FillAll(fillTime));//将消除后的空位进行填充
     }
@@ -542,8 +641,8 @@ public class GameManager : MonoBehaviour {
             if (nearX != x && nearX >= 0 && nearX < xCol) {
                 if (models[nearX, y].CanClear() && models[nearX, y].Type == ModelType.Wall) {
                     //Debug.Log("clear");
-                    models[nearX, y].HP --;
-                    if (models[nearX, y].HP==0) {
+                    models[nearX, y].HP--;
+                    if (models[nearX, y].HP == 0) {
                         models[nearX, y].ModelClearComponent.Clear();//消除障碍物
                         CreatNewModel(nearX, y, ModelType.Empty);//原地置空等待填充
                     }
@@ -561,7 +660,6 @@ public class GameManager : MonoBehaviour {
                     }
                     CreatNewModel(x, nearY, ModelType.Empty);//原地置空等待填充
                 }
-
             }
         }
     }
@@ -590,61 +688,68 @@ public class GameManager : MonoBehaviour {
                                     scoreStep = 30;
                                     score += scoreStep;
                                     Excellent(1);
-                                    gameTime += 3;
-                                    PlayerPrefs.SetInt("TimeAddNums", PlayerPrefs.GetInt("TimeAddNums", 0) + 3);//记录累计加时
+                                    if (isSkill == false) {
+                                        gameTime += 3;
+                                        PlayerPrefs.SetInt("TimeAddNums", PlayerPrefs.GetInt("TimeAddNums", 0) + 3);//记录累计加时
+                                    }
                                     break;
                                 case 6:
                                     scoreStep = 60;
                                     score += scoreStep;
                                     Excellent(2);
-                                    gameTime += 5;
-                                    PlayerPrefs.SetInt("TimeAddNums", PlayerPrefs.GetInt("TimeAddNums", 0) + 5);//记录累计加时
+                                    if (isSkill == false) {
+                                        gameTime += 5;
+                                        PlayerPrefs.SetInt("TimeAddNums", PlayerPrefs.GetInt("TimeAddNums", 0) + 5);//记录累计加时
+                                    }
                                     break;
                                 case 7:
                                     scoreStep = 100;
                                     score += scoreStep;
                                     Excellent(3);
-                                    gameTime += 10;
-                                    PlayerPrefs.SetInt("TimeAddNums", PlayerPrefs.GetInt("TimeAddNums", 0) + 10);//记录累计加时
+                                    if (isSkill == false) {
+                                        gameTime += 10;
+                                        PlayerPrefs.SetInt("TimeAddNums", PlayerPrefs.GetInt("TimeAddNums", 0) + 10);//记录累计加时
+                                    }
                                     break;
                             }
                         }
-                       
-                        //生成奖励块
+                        //生成奖励球
                         ModelType specialModelType = ModelType.Count;//是否产生特殊奖励
-                        ModelBase model = matchList[0];
+                        //ModelBase model = matchList[Random.Range(0, matchList.Count)];
+                        ModelBase model = models[Random.Range(0, xCol), Random.Range(0, yRow)];
                         int specialModelX = model.X;
                         int specialModelY = model.Y;
-                        if (num >= 3) {
-                            if ( Random.Range(0, 3) == 0) {
-                                specialModelType = ModelType.CrossClear;
-                            }
-                            else if (Random.Range(0, 3) == 1) {
-                                //Debug.Log(matchList.Count);
-                                specialModelType = ModelType.RainBow;
-                            }
+                        if (matchList.Count == 5) {
+                            specialModelType = ModelType.CrossClear;
                         }
+                        else if (matchList.Count >= 6) {
+                            specialModelType = ModelType.RainBow;
+                        }
+
+                        if (isSkill) {
+                            //specialModelType = ModelType.Count;
+                        }
+                        matchList.Add(models[model.x, model.y]);
                         foreach (var m in matchList) {
                             if (ClearModel(m.X, m.Y)) {
                                 needFill = true;
                             }
                         }
-                        if (specialModelType != ModelType.Count && (time >= 2f && time < 2.1f) || (time >= 4f && time < 4.1f) || (time >= 6f && time < 6.1f) || (time >= 8f && time < 8.1f)) {
-                          //if (specialModelType != ModelType.Count) {
-                            Destroy(models[specialModelX, specialModelY]);
-                            specialModelType = Random.Range(0, 2) == 1 ? ModelType.CrossClear : ModelType.RainBow;
-                            ModelBase newModel = CreatNewModel(specialModelX, specialModelY, specialModelType);
-                            if (Random.Range(0, 3) == 2) {
-                                //十字消除
+                        if (specialModelType != ModelType.Count) {
+                            isSkill = true;
+                        }
+                        if (specialModelType != ModelType.Count && gameBegin) {
+                            if (models[specialModelX, specialModelY].type == ModelType.Empty) {
+                                Destroy(models[specialModelX, specialModelY]);
+                                ModelBase newModel = CreatNewModel(specialModelX, specialModelY, specialModelType);
                                 if (specialModelType == ModelType.CrossClear && newModel.CanColor() && matchList[0].CanColor()) {
                                     newModel.ModelColorComponent.SetColor(ModelColor.ColorType.Cross);
                                 }
-                                //类型消除的产生
+                                //Rainbow
                                 else if (specialModelType == ModelType.RainBow && newModel.CanColor()) {
                                     newModel.ModelColorComponent.SetColor(ModelColor.ColorType.Rainbow);
                                 }
                             }
-                            models[specialModelX, specialModelY] = newModel;
                         }
                     }
                 }
@@ -658,7 +763,6 @@ public class GameManager : MonoBehaviour {
             PlayerPrefs.SetInt("RainbowNums", PlayerPrefs.GetInt("RainbowNums", 0) + 1);//记录彩虹个数
             awardNums++;
             PlayerPrefs.SetInt("LuckDog", awardNums);
-            //Debug.Log("qingchucaihong");
             int count = 0;
             for (int x = 0; x < xCol; x++) {
                 for (int y = 0; y < yRow; y++) {
@@ -688,7 +792,7 @@ public class GameManager : MonoBehaviour {
                 }
             }
             score += 80;
-            if (models[x,y]!=null) {
+            if (models[x, y] != null) {
                 models[x, y].ModelClearComponent.Clear();
                 models[x, y] = CreatNewModel(x, y, ModelType.Empty);
             }
@@ -700,10 +804,10 @@ public class GameManager : MonoBehaviour {
     #region UI Events
     public void Excellent(int index) {
         Instantiate(excellent[index], spawn);
-        if (index!=0) {
+        if (index != 0) {
             GameObject go = Instantiate(timeAddEffetc[index], canvas);
             switch (index) {
-                case 1: go.GetComponent<RectTransform>().anchoredPosition = new Vector2(700, 800);break;
+                case 1: go.GetComponent<RectTransform>().anchoredPosition = new Vector2(700, 800); break;
                 case 2: go.GetComponent<RectTransform>().anchoredPosition = new Vector2(774, 697); break;
                 case 3: go.GetComponent<RectTransform>().anchoredPosition = new Vector2(774, 697); break;
             }
@@ -772,11 +876,11 @@ public class GameManager : MonoBehaviour {
     }
     //游戏结束的逻辑
     public void GameOver() {
-        if (awardNums>PlayerPrefs.GetInt("LuckDog",0)) {
-            PlayerPrefs.SetInt("LuckDog",awardNums);
+        if (awardNums > PlayerPrefs.GetInt("LuckDog", 0)) {
+            PlayerPrefs.SetInt("LuckDog", awardNums);
         }
         PlayerPrefs.SetInt("TotalScore", (PlayerPrefs.GetInt("TotalScore", 0) + score));//记录累计分数
-        Debug.Log(score+" "+ PlayerPrefs.GetInt("TotalScore", 0));
+        Debug.Log(score + " " + PlayerPrefs.GetInt("TotalScore", 0));
         if (score > PlayerPrefs.GetInt("HistoryHighestScore", 0)) {
             PlayerPrefs.SetInt("HistoryHighestScore", score);
             breakRecord.SetActive(true);

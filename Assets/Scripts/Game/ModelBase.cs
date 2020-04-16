@@ -100,6 +100,10 @@ public class ModelBase : MonoBehaviour {
             Instantiate(effect_Row, new Vector3(0, 1.2f-0.65f*y, 0), Quaternion.Euler(new Vector3(0,0,90)));
             Instantiate(effect_Col,new Vector3(-2.2f + 0.65f * x, -1.6f, 0) , Quaternion.identity);
         }
+//        if (Type == GameManager.ModelType.RainBow) {
+//            manager.ClearByType((ModelColor.ColorType)Random.Range(0,4));
+//            modelClearComponent.Clear();
+//        }
     }
     public void OnMouseUp() {
         manager.ReleaseModel();
